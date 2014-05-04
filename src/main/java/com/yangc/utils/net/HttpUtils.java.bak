@@ -1,0 +1,263 @@
+package com.yangc.utils.net;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+
+public class HttpUtils {
+
+	private static final String UTF_8 = "UTF-8";
+	private static final int TIMEOUT = 6000;
+
+	private HttpUtils() {
+	}
+
+	/**
+	 * @功能: 发送get请求
+	 * @作者: yangc
+	 * @创建日期: 2013-1-9 上午11:01:09
+	 */
+	public static String sendGet(String uri, Map<String, String> paramsMap) {
+		String params = "";
+		if (null != paramsMap && !paramsMap.isEmpty()) {
+			for (Entry<String, String> en : paramsMap.entrySet()) {
+				params += "&" + en.getKey() + "=" + en.getValue();
+			}
+		}
+		if (!params.equals("")) {
+			uri += "?" + params.substring(1);
+		}
+
+		HttpURLConnection conn = null;
+		BufferedReader br = null;
+		StringBuilder sb = new StringBuilder();
+		try {
+			URL url = new URL(uri);
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setDoOutput(true);
+			conn.setDoInput(true);
+			conn.setUseCaches(false);
+			conn.setConnectTimeout(TIMEOUT);
+			conn.setReadTimeout(TIMEOUT);
+			conn.connect();
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+				return null;
+			}
+			br = new BufferedReader(new InputStreamReader(conn.getInputStream(), UTF_8));
+			String str = null;
+			while ((str = br.readLine()) != null) {
+				sb.append(str.trim());
+			}
+			return sb.toString();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (null != br) {
+					br.close();
+					br = null;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (null != conn) {
+				conn.disconnect();
+				conn = null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @功能: 发送post请求
+	 * @作者: yangc
+	 * @创建日期: 2013-1-9 上午11:31:24
+	 */
+	public static String sendPost(String uri, Map<String, String> paramsMap) {
+		String params = "";
+		if (null != paramsMap && !paramsMap.isEmpty()) {
+			for (Entry<String, String> en : paramsMap.entrySet()) {
+				params += "&" + en.getKey() + "=" + en.getValue();
+			}
+		}
+
+		HttpURLConnection conn = null;
+		BufferedReader br = null;
+		DataOutputStream writer = null;
+		StringBuilder sb = new StringBuilder();
+		URL url;
+		try {
+			url = new URL(uri);
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setDoOutput(true);
+			conn.setDoInput(true);
+			conn.setUseCaches(false);
+			conn.setConnectTimeout(TIMEOUT);
+			conn.setReadTimeout(TIMEOUT);
+			conn.setRequestMethod("POST");
+			if (!params.equals("")) {
+				writer = new DataOutputStream(conn.getOutputStream());
+				writer.write(params.substring(1).getBytes(UTF_8));
+				writer.flush();
+			}
+			conn.connect();
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+				return null;
+			}
+			br = new BufferedReader(new InputStreamReader(conn.getInputStream(), UTF_8));
+			String str = null;
+			while ((str = br.readLine()) != null) {
+				sb.append(str.trim());
+			}
+			return sb.toString();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (null != writer) {
+					writer.close();
+					writer = null;
+				}
+				if (null != br) {
+					br.close();
+					br = null;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (null != conn) {
+				conn.disconnect();
+				conn = null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @功能: 发送Apache get请求
+	 * @作者: yangc
+	 * @创建日期: 2013-1-9 上午11:01:09
+	 */
+	public static String sendApacheGet(String uri, Map<String, String> paramsMap) {
+		NameValuePair[] pairs = null;
+		if (null != paramsMap && !paramsMap.isEmpty()) {
+			pairs = new NameValuePair[paramsMap.size()];
+			int i = 0;
+			for (Entry<String, String> en : paramsMap.entrySet()) {
+				pairs[i++] = new NameValuePair(en.getKey(), en.getValue());
+			}
+		}
+
+		GetMethod httpMethod = new GetMethod(uri);
+		if (pairs != null) httpMethod.setQueryString(pairs);
+		HttpClient httpClient = new HttpClient();
+		httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(TIMEOUT);
+		BufferedReader br = null;
+		StringBuilder sb = new StringBuilder();
+		try {
+			int responseCode = httpClient.executeMethod(httpMethod);
+			if (responseCode == HttpStatus.SC_OK) {
+				br = new BufferedReader(new InputStreamReader(httpMethod.getResponseBodyAsStream(), UTF_8));
+				String str = null;
+				while ((str = br.readLine()) != null) {
+					sb.append(str.trim());
+				}
+				return sb.toString();
+			}
+		} catch (HttpException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (null != br) {
+					br.close();
+					br = null;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			httpMethod.releaseConnection();
+		}
+		return null;
+	}
+
+	/**
+	 * @功能: 发送Apache post请求
+	 * @作者: yangc
+	 * @创建日期: 2013-1-9 上午11:31:24
+	 */
+	public static String sendApachePost(String uri, Map<String, String> paramsMap) {
+		NameValuePair[] pairs = null;
+		if (null != paramsMap && !paramsMap.isEmpty()) {
+			pairs = new NameValuePair[paramsMap.size()];
+			int i = 0;
+			for (Entry<String, String> en : paramsMap.entrySet()) {
+				pairs[i++] = new NameValuePair(en.getKey(), en.getValue());
+			}
+		}
+
+		PostMethod httpMethod = new PostMethod(uri);
+		if (pairs != null) httpMethod.setRequestBody(pairs);
+		HttpClient httpClient = new HttpClient();
+		httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(TIMEOUT);
+		BufferedReader br = null;
+		StringBuilder sb = new StringBuilder();
+		try {
+			int responseCode = httpClient.executeMethod(httpMethod);
+			if (responseCode == HttpStatus.SC_OK) {
+				br = new BufferedReader(new InputStreamReader(httpMethod.getResponseBodyAsStream(), UTF_8));
+				String str = null;
+				while ((str = br.readLine()) != null) {
+					sb.append(str.trim());
+				}
+				return sb.toString();
+			}
+		} catch (HttpException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (null != br) {
+					br.close();
+					br = null;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			httpMethod.releaseConnection();
+		}
+		return null;
+	}
+
+	public static void main(String[] args) {
+		String uri = "http://119.253.49.102:9080/interface/getUserListByGroupIdAndNickname.do";
+		Map<String, String> paramsMap = new HashMap<String, String>();
+		paramsMap.put("groupId", "0");
+
+		System.out.println(HttpUtils.sendGet(uri, paramsMap));
+		System.out.println(HttpUtils.sendPost(uri, paramsMap));
+		System.out.println(HttpUtils.sendApacheGet(uri, paramsMap));
+		System.out.println(HttpUtils.sendApachePost(uri, paramsMap));
+	}
+
+}
