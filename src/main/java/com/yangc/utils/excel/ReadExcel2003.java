@@ -3,7 +3,6 @@ package com.yangc.utils.excel;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +35,6 @@ public class ReadExcel2003 {
 	private int beginRownum;
 
 	private HSSFListener userModelEventListener = new HSSFListener() {
-		private DecimalFormat df = new DecimalFormat("0");
 		private SSTRecord sstRecord;
 		private Map<String, String> currentRow; // 当前行记录
 		private int currentRownum = -1; // 当前行号
@@ -73,11 +71,18 @@ public class ReadExcel2003 {
 			// 解析数字或日期
 			case NumberRecord.sid:
 				NumberRecord numberRecord = (NumberRecord) record;
+				String value = null;
 				if (HSSFDateUtil.isInternalDateFormat(numberRecord.getXFIndex())) {
-					this.addData(numberRecord.getRow(), numberRecord.getColumn(), DateFormatUtils.format((long) numberRecord.getValue(), "yyyy-MM-dd"));
+					value = DateFormatUtils.format((long) numberRecord.getValue(), "yyyy-MM-dd");
 				} else {
-					this.addData(numberRecord.getRow(), numberRecord.getColumn(), this.df.format(numberRecord.getValue()));
+					double cellValue = numberRecord.getValue();
+					if (cellValue == (long) cellValue) {
+						value = Long.toString((long) cellValue);
+					} else {
+						value = Double.toString(cellValue);
+					}
 				}
+				this.addData(numberRecord.getRow(), numberRecord.getColumn(), value);
 				break;
 			// 解析boolean或error
 			case BoolErrRecord.sid:
@@ -97,7 +102,7 @@ public class ReadExcel2003 {
 			// 解析公式
 			case FormulaRecord.sid:
 				FormulaRecord formulaRecord = (FormulaRecord) record;
-				this.addData(formulaRecord.getRow(), formulaRecord.getColumn(), this.df.format(formulaRecord.getValue()));
+				this.addData(formulaRecord.getRow(), formulaRecord.getColumn(), Double.toString(formulaRecord.getValue()));
 				break;
 			}
 		}
