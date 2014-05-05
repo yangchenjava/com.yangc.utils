@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.yangc.utils.excel.ExcelBean;
 import com.yangc.utils.excel.SheetBean;
@@ -17,13 +18,20 @@ public class WriteExcelTest {
 		sheet_1.setSheetName("工作簿_1");
 		sheet_1.setTitle("我  是  大  标  题_1");
 		sheet_1.setRownum(1);
-		String[] headNames_1 = { "姓名", "职务", "电话", "住址", "邮编", "备注" };
+		sheet_1.setMergeColCount(6);
+		Map<Integer, String> headNames_1 = new HashMap<Integer, String>();
+		headNames_1.put(0, "姓名");
+		headNames_1.put(1, "职务");
+		headNames_1.put(2, "电话");
+		headNames_1.put(3, "住址");
+		headNames_1.put(4, "邮编");
+		headNames_1.put(5, "备注");
 		sheet_1.setHeadNames(headNames_1);
 		List<Map<String, Object>> tableContents_1 = new ArrayList<Map<String, Object>>();
 		for (int i = 0; i < 1000; i++) {
 			Map<String, Object> rowContents = new HashMap<String, Object>();
-			for (int j = 0; j < headNames_1.length; j++) {
-				rowContents.put(headNames_1[j], headNames_1[j] + i);
+			for (Entry<Integer, String> entry : headNames_1.entrySet()) {
+				rowContents.put(entry.getValue(), entry.getValue() + entry.getKey());
 			}
 			tableContents_1.add(rowContents);
 		}
@@ -33,18 +41,27 @@ public class WriteExcelTest {
 		sheet_2.setSheetName("工作簿_2");
 		sheet_2.setTitle("我是大标题_2");
 		sheet_2.setRownum(5);
-		String[] headNames_2 = { "姓名", "职务", "电话", "住址", "邮编", "备注" };
+		sheet_2.setMergeColCount(6);
+		Map<Integer, String> headNames_2 = new HashMap<Integer, String>();
+		headNames_2.put(0, "姓名");
+		headNames_2.put(2, "电话");
+		headNames_2.put(3, "住址");
+		headNames_2.put(5, "备注");
 		sheet_2.setHeadNames(headNames_2);
 		List<Map<String, Object>> tableContents_2 = new ArrayList<Map<String, Object>>();
 		for (int i = 0; i < 1000; i++) {
 			Map<String, Object> rowContents = new HashMap<String, Object>();
-			for (int j = 0; j < headNames_2.length; j++) {
-				if (j == 2) {
-					rowContents.put(headNames_2[j], i);
-				} else if (j == 5) {
-					rowContents.put(headNames_2[j], new Date());
-				} else {
-					rowContents.put(headNames_2[j], headNames_2[j] + i);
+			for (Entry<Integer, String> entry : headNames_1.entrySet()) {
+				switch (entry.getKey()) {
+				case 2:
+					rowContents.put(entry.getValue(), i);
+					break;
+				case 5:
+					rowContents.put(entry.getValue(), new Date());
+					break;
+				default:
+					rowContents.put(entry.getValue(), entry.getValue() + i);
+					break;
 				}
 			}
 			tableContents_2.add(rowContents);

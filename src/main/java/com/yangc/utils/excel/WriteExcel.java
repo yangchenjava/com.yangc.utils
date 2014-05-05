@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -25,14 +25,20 @@ public class WriteExcel {
 	private Workbook workbook;
 	private CreationHelper helper;
 
-	private CellStyle titleCellStyle;
-	private CellStyle headCellStyle;
-	private CellStyle contentCellStyle;
-	private CellStyle numberCellStyle;
+	private CellStyle titleCellStyle; // 标题的样式
+	private CellStyle headCellStyle; // 表头的样式
+	private CellStyle contentCellStyle; // 内容的样式
+	private CellStyle numberCellStyle; // 保留两位小数的样式
 
+	/**
+	 * @功能: 写excel
+	 * @作者: yangc
+	 * @创建日期: 2014年5月5日 下午8:08:41
+	 * @param excelBean
+	 * @return
+	 */
 	public boolean write(ExcelBean excelBean) {
-		String suffix = excelBean.getPath().substring(excelBean.getPath().lastIndexOf(".") + 1);
-		if (StringUtils.equals(suffix, "xlsx")) {
+		if (excelBean.getPath().endsWith("xlsx")) {
 			// 2007以上
 			workbook = new SXSSFWorkbook(200);
 		} else {
@@ -119,18 +125,18 @@ public class WriteExcel {
 		Cell titleCell = sheet.createRow(0).createCell(0);
 		titleCell.setCellStyle(titleCellStyle);
 		titleCell.setCellValue(helper.createRichTextString(sheetBean.getTitle()));
-		sheet.addMergedRegion(CellRangeAddress.valueOf(new StringBuilder("$A$1:$").append((char) ('A' + sheetBean.getHeadNames().length - 1)).append("$1").toString()));
+		sheet.addMergedRegion(CellRangeAddress.valueOf(new StringBuilder("$A$1:$").append((char) ('A' + sheetBean.getMergeColCount() - 1)).append("$1").toString()));
 
 		// 表头
 		int rownum = sheetBean.getRownum();
-		String[] headNames = sheetBean.getHeadNames();
+		Map<Integer, String> headNames = sheetBean.getHeadNames();
 		if (headNames != null) {
 			Row headRow = sheet.createRow(rownum);
-			for (int i = 0; i < headNames.length; i++) {
-				Cell headCell = headRow.createCell(i);
+			for (Entry<Integer, String> entry : headNames.entrySet()) {
+				Cell headCell = headRow.createCell(entry.getKey());
 				headCell.setCellStyle(headCellStyle);
-				headCell.setCellValue(helper.createRichTextString(headNames[i]));
-				sheet.setColumnWidth(i, 5000);
+				headCell.setCellValue(helper.createRichTextString(entry.getValue()));
+				sheet.setColumnWidth(entry.getKey(), 5000);
 			}
 			rownum++;
 		}
@@ -146,12 +152,12 @@ public class WriteExcel {
 		}
 	}
 
-	private void createCell(Row row, String[] headNames, Map<String, Object> rowContents) {
-		for (int i = 0; i < headNames.length; i++) {
-			Cell cell = row.createCell(i);
+	private void createCell(Row row, Map<Integer, String> headNames, Map<String, Object> rowContents) {
+		for (Entry<Integer, String> entry : headNames.entrySet()) {
+			Cell cell = row.createCell(entry.getKey());
 			cell.setCellStyle(contentCellStyle);
 
-			Object cellContents = rowContents.get(headNames[i]);
+			Object cellContents = rowContents.get(entry.getValue());
 			if (cellContents instanceof String) {
 				cell.setCellValue(helper.createRichTextString((String) cellContents));
 			} else if (cellContents instanceof Integer || cellContents instanceof Long) {
