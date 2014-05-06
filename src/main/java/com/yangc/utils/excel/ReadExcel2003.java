@@ -37,7 +37,7 @@ public class ReadExcel2003 {
 	private HSSFListener userModelEventListener = new HSSFListener() {
 		private SSTRecord sstRecord;
 		private Map<String, String> currentRow; // 当前行记录
-		private int currentRownum = -1; // 当前行号
+		private int currentRownum = -1; // 当前行下标
 
 		@Override
 		public void processRecord(Record record) {

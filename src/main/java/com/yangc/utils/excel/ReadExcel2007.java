@@ -43,8 +43,8 @@ public class ReadExcel2007 {
 
 		private Map<String, String> currentRow; // 当前行记录
 		private StringBuilder lastContents = new StringBuilder(); // 上一次的内容
-		private int currentRownum = -1; // 当前行号
-		private int row, col;
+		private int currentRownum = -1; // 当前行下标
+		private int row, col; // 正在解析的行列下标值
 		private CellDataType nextDataType; // 单元格数据类型
 		private DataFormatter df = new DataFormatter();
 		private short formatIndex;
@@ -55,32 +55,34 @@ public class ReadExcel2007 {
 			this.st = st;
 		}
 
+		/**
+		 * @功能: 解析行列值 C5 表示5行3列, 解析的下标值为 row:4 col:2
+		 * @作者: yangc
+		 * @创建日期: 2014年5月6日 下午10:00:58
+		 * @param colRowNum
+		 */
 		private void loadColRowNum(String colRowNum) {
-			this.row = -1;
-			this.col = -1;
-			if (StringUtils.isNotBlank(colRowNum)) {
-				int firstDigit = -1;
-				for (int i = 0; i < colRowNum.length(); i++) {
-					if (Character.isDigit(colRowNum.charAt(i))) {
-						firstDigit = i;
-						break;
-					}
+			int firstDigit = -1;
+			for (int i = 0; i < colRowNum.length(); i++) {
+				if (Character.isDigit(colRowNum.charAt(i))) {
+					firstDigit = i;
+					break;
 				}
-				this.row = Integer.parseInt(colRowNum.substring(firstDigit)) - 1;
-				String columnName = colRowNum.substring(0, firstDigit);
-				int column = 0;
-				for (int i = 0; i < columnName.length(); i++) {
-					column += 26 * i + columnName.charAt(i) - 'A';
-				}
-				this.col = column;
 			}
+			this.row = Integer.parseInt(colRowNum.substring(firstDigit)) - 1;
+			String columnName = colRowNum.substring(0, firstDigit);
+			int column = 0;
+			for (int i = 0; i < columnName.length(); i++) {
+				column += 26 * i + columnName.charAt(i) - 'A';
+			}
+			this.col = column;
 		}
 
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 			this.lastContents.setLength(0);
 			if (StringUtils.equals(qName, "c")) {
-				String colRowNum = attributes.getValue("r");
+				String colRowNum = attributes.getValue("r").toUpperCase();
 				String cellType = attributes.getValue("t");
 				String cellStyleStr = attributes.getValue("s");
 
@@ -132,6 +134,7 @@ public class ReadExcel2007 {
 					value = new XSSFRichTextString(this.lastContents.toString()).getString();
 					break;
 				case SSTINDEX:
+					// 这里解析出来的是索引值, 不是真正的单元格内容
 					value = new XSSFRichTextString(this.sst.getEntryAt(Integer.parseInt(this.lastContents.toString()))).getString();
 					break;
 				case NUMBER:
@@ -173,6 +176,15 @@ public class ReadExcel2007 {
 		}
 	}
 
+	/**
+	 * @功能: 解析2007版excel
+	 * @作者: yangc
+	 * @创建日期: 2014年5月5日 下午8:05:27
+	 * @param path 文件路径
+	 * @param headNames 要解析的列号(从0开始)
+	 * @param beginRownum 开始解析的行号(从0开始)
+	 * @return
+	 */
 	public List<Map<String, String>> read(String path, Map<Integer, String> headNames, int beginRownum) {
 		if (!path.endsWith("xlsx")) {
 			throw new IllegalArgumentException("This is not 2007 Excel");
