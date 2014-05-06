@@ -48,6 +48,7 @@ public class ReadExcel2003 {
 				if (bofRecord.getType() == BOFRecord.TYPE_WORKBOOK) {
 					System.out.println("开始解析Excel");
 				} else if (bofRecord.getType() == BOFRecord.TYPE_WORKSHEET) {
+					this.currentRownum = -1;
 					System.out.println("开始解析sheet");
 				}
 				break;

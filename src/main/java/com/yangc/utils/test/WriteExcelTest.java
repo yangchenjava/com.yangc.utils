@@ -31,7 +31,7 @@ public class WriteExcelTest {
 		for (int i = 0; i < 1000; i++) {
 			Map<String, Object> rowContents = new HashMap<String, Object>();
 			for (Entry<Integer, String> entry : headNames_1.entrySet()) {
-				rowContents.put(entry.getValue(), entry.getValue() + entry.getKey());
+				rowContents.put(entry.getValue(), entry.getValue() + i);
 			}
 			tableContents_1.add(rowContents);
 		}

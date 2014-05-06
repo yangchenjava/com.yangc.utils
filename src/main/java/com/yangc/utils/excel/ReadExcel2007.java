@@ -3,6 +3,7 @@ package com.yangc.utils.excel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,8 +12,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.ss.usermodel.BuiltinFormats;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
+import org.apache.poi.xssf.model.StylesTable;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -22,30 +28,68 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 public class ReadExcel2007 {
 
+	private List<Map<String, String>> tableContents = new ArrayList<Map<String, String>>();
+
+	private Map<Integer, String> headNames;
+	private int beginRownum;
+
 	enum CellDataType {
 		BOOL, ERROR, FORMULA, INLINESTR, SSTINDEX, NUMBER, DATE, NULL
 	}
 
 	private class ExcelSAXHandler extends DefaultHandler {
 		private SharedStringsTable sst; // 共享字符串表
+		private StylesTable st; // 单元格样式表
 
-		private List<Map<String, String>> tableContents = new ArrayList<Map<String, String>>();
-
+		private Map<String, String> currentRow; // 当前行记录
 		private StringBuilder lastContents = new StringBuilder(); // 上一次的内容
-		private int currentRow; // 当前行
-		private int currentCol; // 当前列
-		private boolean isTElement; // T元素标识
-		private CellDataType nextDataType = CellDataType.NUMBER; // 单元格数据类型
+		private int currentRownum = -1; // 当前行号
+		private int row, col;
+		private CellDataType nextDataType; // 单元格数据类型
+		private DataFormatter df = new DataFormatter();
+		private short formatIndex;
+		private String formatString;
 
-		private ExcelSAXHandler(SharedStringsTable sst) {
+		private ExcelSAXHandler(SharedStringsTable sst, StylesTable st) {
 			this.sst = sst;
+			this.st = st;
+		}
+
+		private void loadColRowNum(String colRowNum) {
+			this.row = -1;
+			this.col = -1;
+			if (StringUtils.isNotBlank(colRowNum)) {
+				int firstDigit = -1;
+				for (int i = 0; i < colRowNum.length(); i++) {
+					if (Character.isDigit(colRowNum.charAt(i))) {
+						firstDigit = i;
+						break;
+					}
+				}
+				this.row = Integer.parseInt(colRowNum.substring(firstDigit)) - 1;
+				String columnName = colRowNum.substring(0, firstDigit);
+				int column = 0;
+				for (int i = 0; i < columnName.length(); i++) {
+					column += 26 * i + columnName.charAt(i) - 'A';
+				}
+				this.col = column;
+			}
 		}
 
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-			if (qName.equals("c")) {
+			this.lastContents.setLength(0);
+			if (StringUtils.equals(qName, "c")) {
+				String colRowNum = attributes.getValue("r");
 				String cellType = attributes.getValue("t");
 				String cellStyleStr = attributes.getValue("s");
+
+				// 载入当前行列
+				this.loadColRowNum(colRowNum);
+
+				this.nextDataType = CellDataType.NUMBER;
+				this.formatIndex = -1;
+				this.formatString = null;
 
 				if (StringUtils.equals(cellType, "b")) {
 					this.nextDataType = CellDataType.BOOL;
@@ -58,15 +102,68 @@ public class ReadExcel2007 {
 				} else if (StringUtils.equals(cellType, "s")) {
 					this.nextDataType = CellDataType.SSTINDEX;
 				} else if (StringUtils.isNotBlank(cellStyleStr)) {
-					
+					XSSFCellStyle style = st.getStyleAt(Integer.parseInt(cellStyleStr));
+					this.formatIndex = style.getDataFormat();
+					this.formatString = style.getDataFormatString();
+					if (StringUtils.isBlank(this.formatString)) {
+						this.formatString = BuiltinFormats.getBuiltinFormat(this.formatIndex);
+					}
 				}
 			}
-			this.isTElement = qName.equals("t");
-			this.lastContents.setLength(0);
 		}
 
 		@Override
 		public void endElement(String uri, String localName, String qName) throws SAXException {
+			if (StringUtils.equals(qName, "t")) {
+				this.addData(this.lastContents.toString());
+			} else if (StringUtils.equals(qName, "v")) {
+				String value = null;
+				switch (this.nextDataType) {
+				case BOOL:
+					value = this.lastContents.charAt(0) == '0' ? "FALSE" : "TRUE";
+					break;
+				case ERROR:
+					value = "ERROR:" + this.lastContents.toString();
+					break;
+				case FORMULA:
+					value = this.lastContents.toString();
+					break;
+				case INLINESTR:
+					value = new XSSFRichTextString(this.lastContents.toString()).getString();
+					break;
+				case SSTINDEX:
+					value = new XSSFRichTextString(this.sst.getEntryAt(Integer.parseInt(this.lastContents.toString()))).getString();
+					break;
+				case NUMBER:
+					if (StringUtils.isBlank(this.formatString)) {
+						value = this.lastContents.toString();
+					} else {
+						value = df.formatRawCellContents(Double.parseDouble(this.lastContents.toString()), formatIndex, formatString);
+					}
+					break;
+				case DATE:
+					value = df.formatRawCellContents(Double.parseDouble(this.lastContents.toString()), formatIndex, formatString);
+					break;
+				case NULL:
+					value = "";
+					break;
+				}
+				this.addData(value);
+			} else if (StringUtils.equals(qName, "row")) {
+				// 读到行尾
+				this.currentRownum = -1;
+			}
+		}
+
+		private void addData(String value) {
+			if (this.row >= beginRownum && headNames.containsKey(this.col)) {
+				if (this.currentRownum != this.row) {
+					this.currentRow = new HashMap<String, String>();
+					tableContents.add(this.currentRow);
+					this.currentRownum = this.row;
+				}
+				this.currentRow.put(headNames.get(this.col), value.trim());
+			}
 		}
 
 		@Override
@@ -80,11 +177,13 @@ public class ReadExcel2007 {
 		if (!path.endsWith("xlsx")) {
 			throw new IllegalArgumentException("This is not 2007 Excel");
 		}
+		this.headNames = headNames;
+		this.beginRownum = beginRownum;
 
 		try {
 			XSSFReader reader = new XSSFReader(OPCPackage.open(path));
 			XMLReader xmlReader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
-			xmlReader.setContentHandler(new ExcelSAXHandler(reader.getSharedStringsTable()));
+			xmlReader.setContentHandler(new ExcelSAXHandler(reader.getSharedStringsTable(), reader.getStylesTable()));
 
 			Iterator<InputStream> sheets = reader.getSheetsData();
 			while (sheets.hasNext()) {
@@ -101,7 +200,7 @@ public class ReadExcel2007 {
 		} catch (SAXException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return tableContents;
 	}
 
 }
