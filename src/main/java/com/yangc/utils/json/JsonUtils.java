@@ -6,29 +6,26 @@ public class JsonUtils {
 
 	private static Gson gson;
 
-	private JsonUtils() {
+	static {
+		gson = new Gson();
 	}
 
-	private synchronized static Gson getInstance() {
-		if (gson == null) {
-			gson = new Gson();
-		}
-		return gson;
+	private JsonUtils() {
 	}
 
 	public static <T> T fromJson(String json, Class<T> clazz) {
 		if (json == null || json.equals("") || json.equals("null")) {
 			return null;
 		}
-		return JsonUtils.getInstance().fromJson(json, clazz);
+		return JsonUtils.gson.fromJson(json, clazz);
 	}
 
 	public static String toJson(Object src) {
-		return JsonUtils.getInstance().toJson(src);
+		return JsonUtils.gson.toJson(src);
 	}
 
 	public static String toJsonTree(Object src) {
-		return JsonUtils.getInstance().toJsonTree(src).toString();
+		return JsonUtils.gson.toJsonTree(src).toString();
 	}
 
 }
