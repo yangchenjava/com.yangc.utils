@@ -1,0 +1,18 @@
+﻿ffmpeg中输出的内容
+
+ffmpeg version N-63113-g72dcd48 Copyright (c) 2000-2014 the FFmpeg developersbuilt on May 12 2014 22:10:08 with gcc 4.8.2 (GCC)configuration: --enable-gpl --enable-version3 --disable-w32threads --enable-avisynth --enable-bzlib --enable-fontconfig --enable-frei0r --enable-gnutls --enable-iconv --enable-libass --enable-libbluray --enable-libcaca --enable-libfreetype --enable-libgsm --enable-libilbc --enable-libmodplug --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libopus --enable-librtmp --enable-libschroedinger --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvo-aacenc --enable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-libwavpack --enable-libx264 --enable-libx265 --enable-libxavs --enable-libxvid --enable-decklink --enable-zlib
+libavutil      52. 83.100 / 52. 83.100
+libavcodec     55. 61.100 / 55. 61.100
+libavformat    55. 37.102 / 55. 37.102
+libavdevice    55. 13.101 / 55. 13.101
+libavfilter     4.  5.100 /  4.  5.100
+libswscale      2.  6.100 /  2.  6.100
+libswresample   0. 18.100 /  0. 18.100
+libpostproc    52.  3.100 / 52.  3.100
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'F:/ffmpeg/test.mp4':
+Metadata:
+major_brand     : isom
+minor_version   : 512
+compatible_brands: isomiso2mp41
+Duration: 00:00:15.84, start: 0.000000, bitrate: 728 kb/s
+Stream #0:0(eng): Video: h264 (Baseline) (avc1 / 0x31637661), yuv420p, 720x480, 631 kb/s, 8.71 fps, 100 tbr, 1k tbn, 2k tbc (default)Metadata:handler_name    : VideoHandlerStream #0:1(eng): Audio: aac (mp4a / 0x6134706D), 44100 Hz, mono, fltp, 66 kb/s (default)Metadata:handler_name    : SoundHandlerAt least one output file must be specified
