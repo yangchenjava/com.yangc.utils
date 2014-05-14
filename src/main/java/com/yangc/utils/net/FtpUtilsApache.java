@@ -21,6 +21,15 @@ public class FtpUtilsApache {
 
 	private static final int BUFFER_SIZE = 1024 * 4;
 
+	/**
+	 * @功能: 登录FTP服务器
+	 * @作者: yangc
+	 * @创建日期: 2013-11-21 下午03:31:51
+	 * @param ipAddress IP地址(192.168.112.128)
+	 * @param port 端口(21)
+	 * @param username 用户名(root)
+	 * @param password 密码(123456)
+	 */
 	public FTPClient login(String ipAddress, int port, String username, String password) {
 		FTPClient client = new FTPClient();
 		client.setDefaultTimeout(TIMEOUT);
@@ -39,6 +48,11 @@ public class FtpUtilsApache {
 		return client;
 	}
 
+	/**
+	 * @功能: 登出FTP服务器
+	 * @作者: yangc
+	 * @创建日期: 2013-11-21 下午03:31:51
+	 */
 	public void logout(FTPClient client) {
 		if (client != null) {
 			try {
@@ -50,6 +64,11 @@ public class FtpUtilsApache {
 		}
 	}
 
+	/**
+	 * @功能: 获取指定路径下的文件名列表
+	 * @作者: yangc
+	 * @创建日期: 2013-11-21 下午03:31:51
+	 */
 	public List<String> getFileNameList(FTPClient client, String path) {
 		if (client == null || !client.isConnected()) {
 			throw new IllegalArgumentException("FtpClient has bean closed!");
@@ -63,6 +82,13 @@ public class FtpUtilsApache {
 		return new ArrayList<String>();
 	}
 
+	/**
+	 * @功能: 在指定目录下创建目录
+	 * @作者: yangc
+	 * @创建日期: 2013-11-21 下午02:25:10
+	 * @param path 在哪个目录下创建
+	 * @param dirName 要创建的目录名称
+	 */
 	public boolean mkDir(FTPClient client, String path, String dirName) {
 		if (client == null || !client.isConnected()) {
 			throw new IllegalArgumentException("FtpClient has bean closed!");
@@ -77,6 +103,13 @@ public class FtpUtilsApache {
 		return false;
 	}
 
+	/**
+	 * @功能: 在指定目录下删除文件
+	 * @作者: yangc
+	 * @创建日期: 2013-11-21 下午02:25:10
+	 * @param path 在哪个目录下删除
+	 * @param fileName 要删除的文件名称
+	 */
 	public boolean deleteFile(FTPClient client, String path, String fileName) {
 		if (client == null || !client.isConnected()) {
 			throw new IllegalArgumentException("FtpClient has bean closed!");
@@ -91,6 +124,13 @@ public class FtpUtilsApache {
 		return false;
 	}
 
+	/**
+	 * @功能: 向FTP服务器上传文件
+	 * @作者: yangc
+	 * @创建日期: 2013-11-21 下午02:25:10
+	 * @param files 要上传的文件
+	 * @param path 上传路径(/var/ftp/pub/)
+	 */
 	public boolean upload(FTPClient client, List<File> files, String path) {
 		if (client == null || !client.isConnected()) {
 			throw new IllegalArgumentException("FtpClient has bean closed!");
@@ -119,6 +159,14 @@ public class FtpUtilsApache {
 		return false;
 	}
 
+	/**
+	 * @功能: 从FTP服务器下载文件
+	 * @作者: yangc
+	 * @创建日期: 2013-11-21 下午03:31:51
+	 * @param fileNames 要下载的文件名(Arrays.asList("test_1.txt", "test_2.txt");)
+	 * @param srcPath FTP服务器文件的路径(/var/ftp/pub/)
+	 * @param destPath 下载后保存的路径(E:/workspace/utils/)
+	 */
 	public boolean download(FTPClient client, List<String> fileNames, String srcPath, String destPath) {
 		if (client == null || !client.isConnected()) {
 			throw new IllegalArgumentException("FtpClient has bean closed!");
