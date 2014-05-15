@@ -12,7 +12,8 @@ public class FtpApacheTest {
 	public static void main(String[] args) {
 		FtpUtilsApache ftp = new FtpUtilsApache();
 		FTPClient client = ftp.login("10.23.101.92", 21, "video", "clt");
-		List<String> fileNameList = ftp.getFileNameList(client, "/opt/video/test");
+		List<String> fileNameList = ftp.getFileNameList(client, "/opt/video/13718922561");
+		System.out.println(fileNameList.toString());
 		System.out.println(fileNameList.size());
 		if (fileNameList.contains("test.mp4")) {
 			boolean b = ftp.download(client, Arrays.asList("test.mp4"), "/opt/video/test", "E:/");
