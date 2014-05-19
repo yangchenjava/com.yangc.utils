@@ -119,6 +119,7 @@ public class MoneyUtils {
 		System.out.println(toChinese("123456789"));
 		System.out.println(toChinese("200214503"));
 		System.out.println(toChinese("203010"));
+		System.out.println(toChinese("10"));
 	}
 
 }
