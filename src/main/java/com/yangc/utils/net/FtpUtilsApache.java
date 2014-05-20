@@ -128,6 +128,17 @@ public class FtpUtilsApache {
 	 * @功能: 向FTP服务器上传文件
 	 * @作者: yangc
 	 * @创建日期: 2013-11-21 下午02:25:10
+	 * @param file 要上传的文件
+	 * @param path 上传路径(/var/ftp/pub/)
+	 */
+	public boolean upload(FTPClient client, File file, String path) {
+		return this.upload(client, Arrays.asList(file), path);
+	}
+
+	/**
+	 * @功能: 向FTP服务器上传文件
+	 * @作者: yangc
+	 * @创建日期: 2013-11-21 下午02:25:10
 	 * @param files 要上传的文件
 	 * @param path 上传路径(/var/ftp/pub/)
 	 */
@@ -157,6 +168,18 @@ public class FtpUtilsApache {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * @功能: 从FTP服务器下载文件
+	 * @作者: yangc
+	 * @创建日期: 2013-11-21 下午03:31:51
+	 * @param fileName 要下载的文件名("test_1.txt")
+	 * @param srcPath FTP服务器文件的路径(/var/ftp/pub/)
+	 * @param destPath 下载后保存的路径(E:/workspace/utils/)
+	 */
+	public boolean download(FTPClient client, String fileName, String srcPath, String destPath) {
+		return this.download(client, Arrays.asList(fileName), srcPath, destPath);
 	}
 
 	/**
