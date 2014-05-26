@@ -17,6 +17,9 @@ import org.apache.commons.lang.StringUtils;
  */
 public class FFMpegUtils {
 
+	private FFMpegUtils() {
+	}
+
 	/**
 	 * @功能: 判断是否是支持的视频格式
 	 * @作者: yangc
