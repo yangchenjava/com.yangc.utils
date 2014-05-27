@@ -1,5 +1,8 @@
 package com.yangc.utils.io;
 
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -13,9 +16,51 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import javax.imageio.ImageIO;
+
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
+
 public class ZipUtils {
 
 	private static final int BUFFER_SIZE = 1024 * 4;
+
+	private ZipUtils() {
+	}
+
+	/**
+	 * @功能: 等比压缩图片到指定路径(根据指定的宽度计算出等比的高度)
+	 * @作者: yangc
+	 * @创建日期: 2014年5月27日 上午10:59:53
+	 */
+	public static void zipImage(String srcImagePath, String zipImagePath, int zipImageWidth) {
+		FileOutputStream fos = null;
+		try {
+			Image image = ImageIO.read(new File(srcImagePath));
+			int width = image.getWidth(null);
+			int height = image.getHeight(null);
+			int zipImageHeight = zipImageWidth * height / width;
+			BufferedImage bi = new BufferedImage(zipImageWidth, zipImageHeight, BufferedImage.TYPE_INT_RGB);
+			Graphics g = bi.getGraphics();
+			g.drawImage(image, 0, 0, zipImageWidth, zipImageHeight, null);
+			g.dispose();
+
+			fos = new FileOutputStream(zipImagePath);
+			JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(fos);
+			encoder.encode(bi);
+			fos.flush();
+			fos.close();
+			fos = null;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (fos != null) fos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	/**
 	 * @功能: 压缩集合中的文件到指定路径
