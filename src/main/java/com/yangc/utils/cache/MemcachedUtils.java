@@ -1,4 +1,4 @@
-package com.yangc.utils.memcached;
+package com.yangc.utils.cache;
 
 import java.util.ArrayList;
 import java.util.Date;

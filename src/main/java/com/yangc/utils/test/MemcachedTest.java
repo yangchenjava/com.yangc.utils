@@ -1,6 +1,6 @@
 package com.yangc.utils.test;
 
-import com.yangc.utils.memcached.MemcachedUtils;
+import com.yangc.utils.cache.MemcachedUtils;
 
 public class MemcachedTest {
 
