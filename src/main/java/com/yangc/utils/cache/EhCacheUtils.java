@@ -44,6 +44,21 @@ public class EhCacheUtils {
 		return false;
 	}
 
+	public boolean replace(String cacheName, Object key, Object value) {
+		try {
+			Cache cache = cacheManager.getCache(cacheName);
+			cache.replace(new Element(key, value));
+			return true;
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (ClassCastException e) {
+			e.printStackTrace();
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 	public <T> T get(String cacheName, Object key, Class<T> clazz) {
 		try {
 			Cache cache = cacheManager.getCache(cacheName);
@@ -59,6 +74,33 @@ public class EhCacheUtils {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public boolean delete(String cacheName, Object key) {
+		try {
+			Cache cache = cacheManager.getCache(cacheName);
+			return cache.remove(key);
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (ClassCastException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public boolean flushAll(String cacheName) {
+		try {
+			Cache cache = cacheManager.getCache(cacheName);
+			cache.removeAll();
+			return true;
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (ClassCastException e) {
+			e.printStackTrace();
+		} catch (CacheException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 }
