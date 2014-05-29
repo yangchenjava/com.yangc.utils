@@ -8,8 +8,8 @@ import java.util.Map;
 
 import org.apache.commons.net.telnet.TelnetClient;
 
-import com.danga.MemCached.MemCachedClient;
-import com.danga.MemCached.SockIOPool;
+import com.whalin.MemCached.MemCachedClient;
+import com.whalin.MemCached.SockIOPool;
 import com.yangc.utils.prop.PropertiesUtils;
 
 public class MemcachedUtils {
@@ -44,7 +44,7 @@ public class MemcachedUtils {
 		// 最大连接数
 		pool.setMaxConn(Integer.parseInt(serverConfig.get("maxConn")));
 		// 连接最大空闲时间
-		pool.setMaxIdle(Long.parseLong(serverConfig.get("maxIdle")));
+		pool.setMaxIdle(Integer.parseInt(serverConfig.get("maxIdle")));
 
 		// 守护线程的休眠时间
 		pool.setMaintSleep(Long.parseLong(serverConfig.get("maintSleep")));

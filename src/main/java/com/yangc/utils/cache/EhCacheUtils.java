@@ -103,4 +103,8 @@ public class EhCacheUtils {
 		return false;
 	}
 
+	public void shutdown() {
+		cacheManager.shutdown();
+	}
+
 }
