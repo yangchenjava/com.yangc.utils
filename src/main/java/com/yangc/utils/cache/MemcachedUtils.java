@@ -16,16 +16,16 @@ public class MemcachedUtils {
 
 	private static final String FILE_PATH = "/memcached.properties";
 
-	private static MemcachedUtils memcachedUtils;
+	private static String[] servers = { "127.0.0.1:11211" };
+	private static Integer[] weights = { 1 };
+	private static final Map<String, String> serverConfig = new HashMap<String, String>();
 
 	// 是否启用memcached
 	private static boolean isUsed = true;
 
 	private static final MemCachedClient client = new MemCachedClient();
 
-	private static String[] servers = { "127.0.0.1:11211" };
-	private static Integer[] weights = { 1 };
-	private static final Map<String, String> serverConfig = new HashMap<String, String>();
+	private static MemcachedUtils memcachedUtils;
 
 	static {
 		initConfig();
@@ -43,7 +43,7 @@ public class MemcachedUtils {
 		pool.setMinConn(Integer.parseInt(serverConfig.get("minConn")));
 		// 最大连接数
 		pool.setMaxConn(Integer.parseInt(serverConfig.get("maxConn")));
-		// 连接最大空闲时间
+		// 最大空闲连接数
 		pool.setMaxIdle(Integer.parseInt(serverConfig.get("maxIdle")));
 
 		// 守护线程的休眠时间
@@ -94,11 +94,11 @@ public class MemcachedUtils {
 			weights[i] = Integer.parseInt(wgts[serverUsed.get(i)]);
 		}
 
-		serverConfig.put("initConn", propertiesUtils.getProperty("memcached.initConn", "5"));
-		serverConfig.put("minConn", propertiesUtils.getProperty("memcached.minConn", "5"));
-		serverConfig.put("maxConn", propertiesUtils.getProperty("memcached.maxConn", "250"));
-		serverConfig.put("maxIdle", propertiesUtils.getProperty("memcached.maxIdle", "3600000"));
-		serverConfig.put("maintSleep", propertiesUtils.getProperty("memcached.maintSleep", "30"));
+		serverConfig.put("initConn", propertiesUtils.getProperty("memcached.initConn", "8"));
+		serverConfig.put("minConn", propertiesUtils.getProperty("memcached.minConn", "8"));
+		serverConfig.put("maxConn", propertiesUtils.getProperty("memcached.maxConn", "32"));
+		serverConfig.put("maxIdle", propertiesUtils.getProperty("memcached.maxIdle", "8"));
+		serverConfig.put("maintSleep", propertiesUtils.getProperty("memcached.maintSleep", "30000"));
 		serverConfig.put("socketConnTO", propertiesUtils.getProperty("memcached.socketConnTO", "0"));
 		serverConfig.put("socketTO", propertiesUtils.getProperty("memcached.socketTO", "10000"));
 	}

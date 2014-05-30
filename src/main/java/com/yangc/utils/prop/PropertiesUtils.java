@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
+
 public class PropertiesUtils {
 
 	private static final String UTF_8 = "UTF-8";
@@ -27,8 +29,8 @@ public class PropertiesUtils {
 	 * @return
 	 */
 	public synchronized static PropertiesUtils getInstance(String filePath) {
-		if (propertiesUtils == null) {
-			if (filePath != null && !filePath.equals("")) {
+		if (propertiesUtils == null || !StringUtils.equals(filePath, FILE_PATH)) {
+			if (StringUtils.isNotBlank(filePath)) {
 				FILE_PATH = filePath;
 			}
 			try {
@@ -66,7 +68,7 @@ public class PropertiesUtils {
 	 * @return
 	 */
 	public String getProperty(String name, String defaultValue) {
-		if (defaultValue == null || defaultValue == "") {
+		if (StringUtils.isBlank(defaultValue)) {
 			throw new IllegalArgumentException("The defaultValue must not be null");
 		}
 		if (prop != null && !prop.isEmpty()) {

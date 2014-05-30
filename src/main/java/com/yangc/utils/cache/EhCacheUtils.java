@@ -7,27 +7,27 @@ import net.sf.ehcache.Element;
 
 public class EhCacheUtils {
 
-	private static String FILE_PATH = "/ehcache.xml";
+	private static final String FILE_PATH = "/ehcache.xml";
 
 	private static CacheManager cacheManager;
 
 	private static EhCacheUtils ehCacheUtils;
 
+	static {
+		cacheManager = new CacheManager(EhCacheUtils.class.getResourceAsStream(FILE_PATH));
+	}
+
 	private EhCacheUtils() {
 	}
 
-	public synchronized static EhCacheUtils getInstance(String filePath) {
+	public synchronized static EhCacheUtils getInstance() {
 		if (ehCacheUtils == null) {
-			if (filePath != null && !filePath.equals("")) {
-				FILE_PATH = filePath;
-			}
-			cacheManager = new CacheManager(EhCacheUtils.class.getResourceAsStream(FILE_PATH));
 			ehCacheUtils = new EhCacheUtils();
 		}
 		return ehCacheUtils;
 	}
 
-	public boolean add(String cacheName, Object key, Object value) {
+	public boolean put(String cacheName, Object key, Object value) {
 		try {
 			Cache cache = cacheManager.getCache(cacheName);
 			cache.put(new Element(key, value));
@@ -76,7 +76,7 @@ public class EhCacheUtils {
 		return null;
 	}
 
-	public boolean delete(String cacheName, Object key) {
+	public boolean remove(String cacheName, Object key) {
 		try {
 			Cache cache = cacheManager.getCache(cacheName);
 			return cache.remove(key);
@@ -88,7 +88,7 @@ public class EhCacheUtils {
 		return false;
 	}
 
-	public boolean flushAll(String cacheName) {
+	public boolean removeAll(String cacheName) {
 		try {
 			Cache cache = cacheManager.getCache(cacheName);
 			cache.removeAll();
@@ -105,6 +105,8 @@ public class EhCacheUtils {
 
 	public void shutdown() {
 		cacheManager.shutdown();
+		cacheManager = null;
+		ehCacheUtils = null;
 	}
 
 }
