@@ -12,6 +12,8 @@ import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
 
+import com.google.gson.reflect.TypeToken;
+import com.yangc.utils.json.JsonUtils;
 import com.yangc.utils.prop.PropertiesUtils;
 
 public class RedisUtils {
@@ -56,7 +58,7 @@ public class RedisUtils {
 		List<Integer> serverUsed = new ArrayList<Integer>();
 
 		TelnetClient telnet = new TelnetClient();
-		for (int i = 0; i < sers.length; i++) {
+		for (int i = 0, len = sers.length; i < len; i++) {
 			int seg = sers[i].indexOf(":");
 			try {
 				telnet.connect(sers[i].substring(0, seg), Integer.parseInt(sers[i].substring(seg + 1)));
@@ -98,24 +100,190 @@ public class RedisUtils {
 		return isUsed;
 	}
 
-	public boolean set(String key, String value) {
+	public boolean set(String key, Object value) {
 		if (isUsed) {
-			ShardedJedis jedis = pool.getResource();
-			String code = jedis.set(key, value);
-			System.out.println(code);
-			pool.returnResource(jedis);
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				jedis.set(key, JsonUtils.toJson(value));
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
 		}
 		return false;
 	}
 
-	public String get(String key) {
+	public boolean set(String key, Object value, long expireTime) {
 		if (isUsed) {
-			ShardedJedis jedis = pool.getResource();
-			String value = jedis.get(key);
-			pool.returnResource(jedis);
-			return value;
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				jedis.set(key, JsonUtils.toJson(value));
+				jedis.expireAt(key, expireTime);
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
+		}
+		return false;
+	}
+
+	public <T> T get(String key, TypeToken<T> typeToken) {
+		if (isUsed) {
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				return JsonUtils.fromJson(jedis.get(key), typeToken);
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
 		}
 		return null;
 	}
 
+	public boolean del(String key) {
+		if (isUsed) {
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				jedis.del(key);
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
+		}
+		return false;
+	}
+
+	public boolean addQueue(String key, Object... values) {
+		if (isUsed) {
+			int len = values.length;
+			String[] strings = new String[len];
+			for (int i = 0; i < len; i++) {
+				strings[i] = JsonUtils.toJson(values[i]);
+			}
+
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				jedis.rpush(key, strings);
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
+		}
+		return false;
+	}
+
+	public <T> T pollQueue(String key, TypeToken<T> typeToken) {
+		if (isUsed) {
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				return JsonUtils.fromJson(jedis.lpop(key), typeToken);
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
+		}
+		return null;
+	}
+
+	public boolean pushStack(String key, Object... values) {
+		if (isUsed) {
+			int len = values.length;
+			String[] strings = new String[len];
+			for (int i = 0; i < len; i++) {
+				strings[i] = JsonUtils.toJson(values[i]);
+			}
+
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				jedis.rpush(key, strings);
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
+		}
+		return false;
+	}
+
+	public <T> T popStack(String key, TypeToken<T> typeToken) {
+		if (isUsed) {
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				return JsonUtils.fromJson(jedis.rpop(key), typeToken);
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
+		}
+		return null;
+	}
+
+	public boolean putHashMap(String key, String[] fields, Object[] values) {
+		if (isUsed && fields.length == values.length) {
+			Map<String, String> map = new HashMap<String, String>();
+			for (int i = 0, len = fields.length; i < len; i++) {
+				map.put(fields[i], JsonUtils.toJson(values[i]));
+			}
+
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				jedis.hmset(key, map);
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
+		}
+		return false;
+	}
+
+	public <T> Object[] getHashMap(String key, String[] fields, TypeToken<T>... typeToken) {
+		if (isUsed) {
+			ShardedJedis jedis = null;
+			try {
+				jedis = pool.getResource();
+				List<String> jsons = jedis.hmget(key, fields);
+
+				int size = jsons.size();
+				Object[] values = new Object[size];
+				if (typeToken.length == 1) {
+					for (int i = 0; i < size; i++) {
+						values[i] = JsonUtils.fromJson(jsons.get(i), typeToken[0]);
+					}
+				} else if (typeToken.length == size) {
+					for (int i = 0; i < size; i++) {
+						values[i] = JsonUtils.fromJson(jsons.get(i), typeToken[i]);
+					}
+				}
+				return values;
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				pool.returnResource(jedis);
+			}
+		}
+		return null;
+	}
 }

@@ -72,7 +72,7 @@ public class MemcachedUtils {
 		List<Integer> serverUsed = new ArrayList<Integer>();
 
 		TelnetClient telnet = new TelnetClient();
-		for (int i = 0; i < sers.length; i++) {
+		for (int i = 0, len = sers.length; i < len; i++) {
 			int seg = sers[i].indexOf(":");
 			try {
 				telnet.connect(sers[i].substring(0, seg), Integer.parseInt(sers[i].substring(seg + 1)));

@@ -1,6 +1,7 @@
 package com.yangc.utils.json;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class JsonUtils {
 
@@ -10,14 +11,18 @@ public class JsonUtils {
 		gson = new Gson();
 	}
 
-	private JsonUtils() {
-	}
-
 	public static <T> T fromJson(String json, Class<T> clazz) {
 		if (json == null || json.equals("") || json.equals("null")) {
 			return null;
 		}
 		return JsonUtils.gson.fromJson(json, clazz);
+	}
+
+	public static <T> T fromJson(String json, TypeToken<T> typeToken) {
+		if (json == null || json.equals("") || json.equals("null")) {
+			return null;
+		}
+		return JsonUtils.gson.fromJson(json, typeToken.getType());
 	}
 
 	public static String toJson(Object src) {
