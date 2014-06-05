@@ -27,44 +27,12 @@ public class MemcachedUtils {
 
 	private static MemcachedUtils memcachedUtils;
 
-	static {
-		initConfig();
-
-		SockIOPool pool = SockIOPool.getInstance();
-
-		// 服务器地址
-		pool.setServers(servers);
-		// 权重
-		pool.setWeights(weights);
-
-		// 初始连接数
-		pool.setInitConn(Integer.parseInt(serverConfig.get("initConn")));
-		// 最小连接数
-		pool.setMinConn(Integer.parseInt(serverConfig.get("minConn")));
-		// 最大连接数
-		pool.setMaxConn(Integer.parseInt(serverConfig.get("maxConn")));
-		// 最大空闲连接数
-		pool.setMaxIdle(Integer.parseInt(serverConfig.get("maxIdle")));
-
-		// 守护线程的休眠时间
-		pool.setMaintSleep(Long.parseLong(serverConfig.get("maintSleep")));
-
-		// 关闭nagle算法
-		pool.setNagle(false);
-		// 连接操作的超时时间, 0为不限制
-		pool.setSocketConnectTO(Integer.parseInt(serverConfig.get("socketConnTO")));
-		// 读取操作的超时时间
-		pool.setSocketTO(Integer.parseInt(serverConfig.get("socketTO")));
-
-		pool.initialize();
-	}
-
 	/**
 	 * @功能: 初始化参数配置
 	 * @作者: yangc
 	 * @创建日期: 2014年3月29日 下午10:46:55
 	 */
-	private static void initConfig() {
+	private void initConfig() {
 		PropertiesUtils propertiesUtils = PropertiesUtils.getInstance(FILE_PATH);
 
 		String[] sers = propertiesUtils.getProperty("memcached.servers").split(",");
@@ -104,6 +72,35 @@ public class MemcachedUtils {
 	}
 
 	private MemcachedUtils() {
+		initConfig();
+
+		SockIOPool pool = SockIOPool.getInstance();
+
+		// 服务器地址
+		pool.setServers(servers);
+		// 权重
+		pool.setWeights(weights);
+
+		// 初始连接数
+		pool.setInitConn(Integer.parseInt(serverConfig.get("initConn")));
+		// 最小连接数
+		pool.setMinConn(Integer.parseInt(serverConfig.get("minConn")));
+		// 最大连接数
+		pool.setMaxConn(Integer.parseInt(serverConfig.get("maxConn")));
+		// 最大空闲连接数
+		pool.setMaxIdle(Integer.parseInt(serverConfig.get("maxIdle")));
+
+		// 守护线程的休眠时间
+		pool.setMaintSleep(Long.parseLong(serverConfig.get("maintSleep")));
+
+		// 关闭nagle算法
+		pool.setNagle(false);
+		// 连接操作的超时时间, 0为不限制
+		pool.setSocketConnectTO(Integer.parseInt(serverConfig.get("socketConnTO")));
+		// 读取操作的超时时间
+		pool.setSocketTO(Integer.parseInt(serverConfig.get("socketTO")));
+
+		pool.initialize();
 	}
 
 	public synchronized static MemcachedUtils getInstance() {

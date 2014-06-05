@@ -13,11 +13,8 @@ public class EhCacheUtils {
 
 	private static EhCacheUtils ehCacheUtils;
 
-	static {
-		cacheManager = new CacheManager(EhCacheUtils.class.getResourceAsStream(FILE_PATH));
-	}
-
 	private EhCacheUtils() {
+		cacheManager = new CacheManager(EhCacheUtils.class.getResourceAsStream(FILE_PATH));
 	}
 
 	public synchronized static EhCacheUtils getInstance() {
