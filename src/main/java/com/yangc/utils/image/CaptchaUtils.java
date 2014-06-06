@@ -1,11 +1,11 @@
-package com.yangc.utils.lang;
+package com.yangc.utils.image;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.FileOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
@@ -38,7 +38,7 @@ public class CaptchaUtils {
 	 * @作者: yangc
 	 * @创建日期: 2014年5月27日 下午5:06:51
 	 */
-	public static void captcha(int width, int height, int size, CAPTCHA_TYPE captchaType, HttpServletRequest request, HttpServletResponse response) {
+	public static boolean captcha(int width, int height, int size, CAPTCHA_TYPE captchaType, HttpServletRequest request, HttpServletResponse response) {
 		String code = getCode(size, captchaType);
 		BufferedImage bi = getBufferedImage(width, height, size, captchaType, code);
 
@@ -46,10 +46,11 @@ public class CaptchaUtils {
 		ServletOutputStream sos = null;
 		try {
 			sos = response.getOutputStream();
-			ImageIO.write(bi, "jpg", sos);
+			boolean result = ImageIO.write(bi, "jpg", sos);
 			sos.flush();
 			sos.close();
 			sos = null;
+			return result;
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -59,6 +60,7 @@ public class CaptchaUtils {
 				e.printStackTrace();
 			}
 		}
+		return false;
 	}
 
 	/**
@@ -66,26 +68,16 @@ public class CaptchaUtils {
 	 * @作者: yangc
 	 * @创建日期: 2014年5月27日 下午5:07:25
 	 */
-	public static void captcha(int width, int height, int size, CAPTCHA_TYPE captchaType, String fileName) {
+	public static boolean captcha(int width, int height, int size, CAPTCHA_TYPE captchaType, String fileName) {
 		String code = getCode(size, captchaType);
 		BufferedImage bi = getBufferedImage(width, height, size, captchaType, code);
 
-		FileOutputStream fos = null;
 		try {
-			fos = new FileOutputStream(fileName);
-			ImageIO.write(bi, "jpg", fos);
-			fos.flush();
-			fos.close();
-			fos = null;
-		} catch (Exception e) {
+			return ImageIO.write(bi, "jpg", new File(fileName));
+		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				if (fos != null) fos.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
+		return false;
 	}
 
 	public static BufferedImage getBufferedImage(int width, int height, int size, CAPTCHA_TYPE captchaType, String code) {

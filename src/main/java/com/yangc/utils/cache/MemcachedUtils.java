@@ -7,12 +7,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.net.telnet.TelnetClient;
+import org.apache.log4j.Logger;
 
 import com.whalin.MemCached.MemCachedClient;
 import com.whalin.MemCached.SockIOPool;
 import com.yangc.utils.prop.PropertiesUtils;
 
 public class MemcachedUtils {
+
+	private static final Logger logger = Logger.getLogger(MemcachedUtils.class);
 
 	private static final String FILE_PATH = "/memcached.properties";
 
@@ -71,9 +74,7 @@ public class MemcachedUtils {
 		serverConfig.put("socketTO", propertiesUtils.getProperty("memcached.socketTO", "10000"));
 	}
 
-	private MemcachedUtils() {
-		initConfig();
-
+	private void initMemcached() {
 		SockIOPool pool = SockIOPool.getInstance();
 
 		// 服务器地址
@@ -101,6 +102,13 @@ public class MemcachedUtils {
 		pool.setSocketTO(Integer.parseInt(serverConfig.get("socketTO")));
 
 		pool.initialize();
+	}
+
+	private MemcachedUtils() {
+		logger.info("=================== 初始化配置文件 ===================");
+		initConfig();
+		logger.info("=================== 初始化 memcached ===============");
+		initMemcached();
 	}
 
 	public synchronized static MemcachedUtils getInstance() {

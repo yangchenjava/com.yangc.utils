@@ -27,8 +27,13 @@ public class RedisUtils {
 
 	private static final String FILE_PATH = "/redis.properties";
 
+	/** 分布式模式 */
 	enum Cluster {
-		SHARD("shard"), SHARD_MASTER_SLAVE("shard_master_slave");
+		/** 分片式一致性hash */
+		SHARD("shard"),
+
+		/** 分片式一致性hash + master-slave主从灾备 */
+		SHARD_MASTER_SLAVE("shard_master_slave");
 
 		private String value;
 
@@ -52,9 +57,12 @@ public class RedisUtils {
 		PropertiesUtils propertiesUtils = PropertiesUtils.getInstance(FILE_PATH);
 
 		String cluster = propertiesUtils.getProperty("redis.cluster");
+		// 只采用分片式一致性hash
 		if (StringUtils.equals(cluster, Cluster.SHARD.value())) {
 			servers = Arrays.asList(propertiesUtils.getProperty("redis.servers").split(","));
-		} else {
+		}
+		// 分片式一致性hash + master-slave主从灾备, 通过sentinel自动切换主从结构
+		else {
 			servers = new ArrayList<String>();
 			String[] sentinels = propertiesUtils.getProperty("redis.sentinels").split(",");
 			for (String sentinel : sentinels) {
@@ -63,6 +71,7 @@ public class RedisUtils {
 				for (Map<String, String> map : jedis.sentinelMasters()) {
 					String masterServer = map.get("ip") + ":" + map.get("port");
 					servers.add(masterServer);
+					// 启动线程用来查看主从结构并进行切换
 					new Thread(new CheckRedisSentinel(jedis, masterServer, map.get("name"), Long.parseLong(map.get("down-after-milliseconds")))).start();
 				}
 			}
@@ -95,6 +104,11 @@ public class RedisUtils {
 		pool = new ShardedJedisPool(poolConfig, shards);
 	}
 
+	/**
+	 * @功能: 检查主从结构, 如果出现主从变更则切换变更状态并重启当前资源池
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:24:44
+	 */
 	private class CheckRedisSentinel implements Runnable {
 		private Jedis jedis;
 		private String masterName;
@@ -150,11 +164,61 @@ public class RedisUtils {
 		return redisUtils;
 	}
 
+	/**
+	 * @功能: 获取jedis资源
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:24:44
+	 * @return
+	 */
+	public ShardedJedis getJedis() {
+		return pool.getResource();
+	}
+
+	/**
+	 * @功能: 释放出现异常的jedis资源
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:27:48
+	 * @param jedis
+	 */
+	public void returnBrokenResource(ShardedJedis jedis) {
+		if (jedis != null) {
+			pool.returnBrokenResource(jedis);
+		}
+	}
+
+	/**
+	 * @功能: 释放jedis资源
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:28:47
+	 * @param jedis
+	 */
+	public void returnResource(ShardedJedis jedis) {
+		if (jedis != null) {
+			pool.returnResource(jedis);
+		}
+	}
+
+	/**
+	 * @功能: 获取当前k-v所在的地址
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:29:13
+	 * @param jedis
+	 * @param key
+	 * @return
+	 */
 	private String getHost(ShardedJedis jedis, String key) {
 		JedisShardInfo shard = jedis.getShardInfo(key);
 		return shard.getHost() + ":" + shard.getPort();
 	}
 
+	/**
+	 * @功能: 设置k-v多少秒后过期
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:30:45
+	 * @param key
+	 * @param seconds
+	 * @return
+	 */
 	public boolean expire(String key, int seconds) {
 		ShardedJedis jedis = null;
 		try {
@@ -171,6 +235,14 @@ public class RedisUtils {
 		return false;
 	}
 
+	/**
+	 * @功能: 设置k-v
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:31:57
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public boolean set(String key, Object value) {
 		ShardedJedis jedis = null;
 		try {
@@ -187,6 +259,13 @@ public class RedisUtils {
 		return false;
 	}
 
+	/**
+	 * @功能: 批量设置k-v
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:32:17
+	 * @param map
+	 * @return
+	 */
 	public boolean batchSet(Map<String, Object> map) {
 		ShardedJedis jedis = null;
 		try {
@@ -206,6 +285,14 @@ public class RedisUtils {
 		return false;
 	}
 
+	/**
+	 * @功能: 获取值
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:34:15
+	 * @param key
+	 * @param typeToken
+	 * @return
+	 */
 	public <T> T get(String key, TypeToken<T> typeToken) {
 		ShardedJedis jedis = null;
 		try {
@@ -221,6 +308,13 @@ public class RedisUtils {
 		return null;
 	}
 
+	/**
+	 * @功能: 删除k-v
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:35:06
+	 * @param key
+	 * @return
+	 */
 	public boolean del(String key) {
 		ShardedJedis jedis = null;
 		try {
@@ -237,6 +331,16 @@ public class RedisUtils {
 		return false;
 	}
 
+	/** ----------------------------- 操作队列 ------------------------------ */
+
+	/**
+	 * @功能: 插入队列
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:59:01
+	 * @param key
+	 * @param values
+	 * @return
+	 */
 	public boolean addQueue(String key, Object... values) {
 		int len = values.length;
 		String[] strings = new String[len];
@@ -259,6 +363,14 @@ public class RedisUtils {
 		return false;
 	}
 
+	/**
+	 * @功能: 移出队列
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:59:29
+	 * @param key
+	 * @param typeToken
+	 * @return
+	 */
 	public <T> T pollQueue(String key, TypeToken<T> typeToken) {
 		ShardedJedis jedis = null;
 		try {
@@ -274,6 +386,16 @@ public class RedisUtils {
 		return null;
 	}
 
+	/** ----------------------------- 操作栈 ------------------------------ */
+
+	/**
+	 * @功能: 压栈
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午11:32:40
+	 * @param key
+	 * @param values
+	 * @return
+	 */
 	public boolean pushStack(String key, Object... values) {
 		int len = values.length;
 		String[] strings = new String[len];
@@ -296,6 +418,14 @@ public class RedisUtils {
 		return false;
 	}
 
+	/**
+	 * @功能: 出栈
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午11:33:09
+	 * @param key
+	 * @param typeToken
+	 * @return
+	 */
 	public <T> T popStack(String key, TypeToken<T> typeToken) {
 		ShardedJedis jedis = null;
 		try {
@@ -311,6 +441,16 @@ public class RedisUtils {
 		return null;
 	}
 
+	/** ----------------------------- 操作hashmap ------------------------------ */
+
+	/**
+	 * @功能: 设置hashmap
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午11:33:27
+	 * @param key
+	 * @param map
+	 * @return
+	 */
 	public boolean putHashMap(String key, Map<String, String> map) {
 		ShardedJedis jedis = null;
 		try {
@@ -327,6 +467,14 @@ public class RedisUtils {
 		return false;
 	}
 
+	/**
+	 * @功能: 获取hashmap中的值
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午11:33:56
+	 * @param key
+	 * @param fields
+	 * @return
+	 */
 	public List<String> getHashMap(String key, String... fields) {
 		ShardedJedis jedis = null;
 		try {
