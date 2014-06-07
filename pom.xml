@@ -127,8 +127,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.google.zxing</groupId>
-			<artifactId>core</artifactId>
-			<version>2.1</version>
+			<artifactId>javase</artifactId>
+			<version>1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
