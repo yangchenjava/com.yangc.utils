@@ -3,9 +3,11 @@ package com.yangc.utils.cache;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -212,6 +214,32 @@ public class RedisUtils {
 	}
 
 	/**
+	 * @功能: 获取所有满足条件的key
+	 * @作者: yangc
+	 * @创建日期: 2014年6月9日 下午2:18:04
+	 * @param pattern
+	 * @return
+	 */
+	public Set<String> keys(String pattern) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			Set<String> keys = new HashSet<String>();
+			for (Jedis j : jedis.getAllShards()) {
+				keys.addAll(j.keys(pattern));
+				j.close();
+			}
+			return keys;
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return null;
+	}
+
+	/**
 	 * @功能: 设置k-v多少秒后过期
 	 * @作者: yangc
 	 * @创建日期: 2014年6月6日 上午10:30:45
@@ -223,7 +251,7 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			jedis.expire(key, seconds);
 			return true;
 		} catch (Exception e) {
@@ -247,7 +275,7 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			jedis.set(key, JsonUtils.toJson(value));
 			return true;
 		} catch (Exception e) {
@@ -297,7 +325,7 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			return JsonUtils.fromJson(jedis.get(key), typeToken);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -319,8 +347,33 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			jedis.del(key);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 删除多组k-v
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午10:35:06
+	 * @param keys
+	 * @return
+	 */
+	public boolean del(String... keys) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			for (Jedis j : jedis.getAllShards()) {
+				j.del(keys);
+				j.close();
+			}
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -351,7 +404,7 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			jedis.rpush(key, strings);
 			return true;
 		} catch (Exception e) {
@@ -375,7 +428,7 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			return JsonUtils.fromJson(jedis.lpop(key), typeToken);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -406,7 +459,7 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			jedis.rpush(key, strings);
 			return true;
 		} catch (Exception e) {
@@ -430,7 +483,7 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			return JsonUtils.fromJson(jedis.rpop(key), typeToken);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -455,7 +508,7 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			jedis.hmset(key, map);
 			return true;
 		} catch (Exception e) {
@@ -479,7 +532,7 @@ public class RedisUtils {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
-			logger.info(this.getHost(jedis, key));
+			logger.debug(this.getHost(jedis, key));
 			return jedis.hmget(key, fields);
 		} catch (Exception e) {
 			e.printStackTrace();

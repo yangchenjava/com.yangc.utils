@@ -1,22 +1,14 @@
 package com.yangc.utils.test;
 
-import java.util.List;
-
-import com.google.gson.reflect.TypeToken;
-import com.yangc.utils.cache.RedisUtils;
+import redis.clients.jedis.Jedis;
 
 public class RedisSentinelTest {
 
 	public static void main(String[] args) {
-		RedisUtils cache = RedisUtils.getInstance();
-		List<User> users = cache.get("users", new TypeToken<List<User>>() {
-		});
-
-		if (users != null && !users.isEmpty()) {
-			for (User user : users) {
-				System.out.println(user);
-			}
-		}
+		Jedis jedis = new Jedis("10.23.6.12", 6379);
+		String str = jedis.get("menuMain_1_1");
+		jedis.close();
+		System.out.println(str);
 	}
 
 }
