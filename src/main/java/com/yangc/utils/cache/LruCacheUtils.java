@@ -38,7 +38,7 @@ import java.util.Map.Entry;
  * <p>
  * 不允许key或者value为null, 当{@link #get}, {@link #put}, {@link #remove}返回值为null时, key相应的项不在cache中
  */
-public class LruCache<K, V> {
+public class LruCacheUtils<K, V> {
 
 	private final LinkedHashMap<K, V> map;
 
@@ -56,7 +56,7 @@ public class LruCache<K, V> {
 	 * @创建日期: 2014年6月6日 下午5:29:01
 	 * @param maxSize 缓存的最大容量
 	 */
-	public LruCache(int maxSize) {
+	public LruCacheUtils(int maxSize) {
 		if (maxSize <= 0) {
 			throw new IllegalArgumentException("maxSize <= 0");
 		}
@@ -66,8 +66,8 @@ public class LruCache<K, V> {
 
 			@Override
 			protected boolean removeEldestEntry(Entry<K, V> eldest) {
-				if (this.size() > LruCache.this.maxSize) {
-					LruCache.this.size -= safeSizeOf(eldest.getKey(), eldest.getValue());
+				if (this.size() > LruCacheUtils.this.maxSize) {
+					LruCacheUtils.this.size -= safeSizeOf(eldest.getKey(), eldest.getValue());
 					return true;
 				}
 				return false;
