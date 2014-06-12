@@ -36,10 +36,8 @@ public class MemcachedUtils {
 	 * @创建日期: 2014年3月29日 下午10:46:55
 	 */
 	private void initConfig() {
-		PropertiesUtils propertiesUtils = PropertiesUtils.getInstance(FILE_PATH);
-
-		String[] sers = propertiesUtils.getProperty("memcached.servers").split(",");
-		String[] wgts = propertiesUtils.getProperty("memcached.weights").split(",");
+		String[] sers = PropertiesUtils.getProperty(FILE_PATH, "memcached.servers").split(",");
+		String[] wgts = PropertiesUtils.getProperty(FILE_PATH, "memcached.weights").split(",");
 		List<Integer> serverUsed = new ArrayList<Integer>();
 
 		TelnetClient telnet = new TelnetClient();
@@ -65,13 +63,13 @@ public class MemcachedUtils {
 			weights[i] = Integer.parseInt(wgts[serverUsed.get(i)]);
 		}
 
-		serverConfig.put("initConn", propertiesUtils.getProperty("memcached.initConn", "8"));
-		serverConfig.put("minConn", propertiesUtils.getProperty("memcached.minConn", "8"));
-		serverConfig.put("maxConn", propertiesUtils.getProperty("memcached.maxConn", "32"));
-		serverConfig.put("maxIdle", propertiesUtils.getProperty("memcached.maxIdle", "8"));
-		serverConfig.put("maintSleep", propertiesUtils.getProperty("memcached.maintSleep", "30000"));
-		serverConfig.put("socketConnTO", propertiesUtils.getProperty("memcached.socketConnTO", "0"));
-		serverConfig.put("socketTO", propertiesUtils.getProperty("memcached.socketTO", "10000"));
+		serverConfig.put("initConn", PropertiesUtils.getProperty(FILE_PATH, "memcached.initConn", "8"));
+		serverConfig.put("minConn", PropertiesUtils.getProperty(FILE_PATH, "memcached.minConn", "8"));
+		serverConfig.put("maxConn", PropertiesUtils.getProperty(FILE_PATH, "memcached.maxConn", "32"));
+		serverConfig.put("maxIdle", PropertiesUtils.getProperty(FILE_PATH, "memcached.maxIdle", "8"));
+		serverConfig.put("maintSleep", PropertiesUtils.getProperty(FILE_PATH, "memcached.maintSleep", "30000"));
+		serverConfig.put("socketConnTO", PropertiesUtils.getProperty(FILE_PATH, "memcached.socketConnTO", "0"));
+		serverConfig.put("socketTO", PropertiesUtils.getProperty(FILE_PATH, "memcached.socketTO", "10000"));
 	}
 
 	private void initMemcached() {

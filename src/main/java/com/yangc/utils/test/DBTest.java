@@ -15,11 +15,10 @@ import com.yangc.utils.prop.PropertiesUtils;
 public class DBTest {
 
 	public static void main(String[] args) {
-		PropertiesUtils prop = PropertiesUtils.getInstance("/jdbc.properties");
-		String driver = prop.getProperty("oracle.driver");
-		String url = prop.getProperty("oracle.url");
-		String username = prop.getProperty("oracle.username");
-		String password = prop.getProperty("oracle.password");
+		String driver = PropertiesUtils.getProperty("/jdbc.properties", "oracle.driver");
+		String url = PropertiesUtils.getProperty("/jdbc.properties", "oracle.url");
+		String username = PropertiesUtils.getProperty("/jdbc.properties", "oracle.username");
+		String password = PropertiesUtils.getProperty("/jdbc.properties", "oracle.password");
 
 		JdbcUtils jdbc = new JdbcUtils();
 		Connection conn = jdbc.getConnection(driver, url, username, password);

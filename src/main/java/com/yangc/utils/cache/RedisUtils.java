@@ -56,17 +56,15 @@ public class RedisUtils {
 	private static RedisUtils redisUtils;
 
 	private void initConfig() {
-		PropertiesUtils propertiesUtils = PropertiesUtils.getInstance(FILE_PATH);
-
-		String cluster = propertiesUtils.getProperty("redis.cluster");
+		String cluster = PropertiesUtils.getProperty(FILE_PATH, "redis.cluster");
 		// 只采用分片式一致性hash
 		if (StringUtils.equals(cluster, Cluster.SHARD.value())) {
-			servers = Arrays.asList(propertiesUtils.getProperty("redis.servers").split(","));
+			servers = Arrays.asList(PropertiesUtils.getProperty(FILE_PATH, "redis.servers").split(","));
 		}
 		// 分片式一致性hash + master-slave主从灾备, 通过sentinel自动切换主从结构
 		else {
 			servers = new ArrayList<String>();
-			String[] sentinels = propertiesUtils.getProperty("redis.sentinels").split(",");
+			String[] sentinels = PropertiesUtils.getProperty(FILE_PATH, "redis.sentinels").split(",");
 			for (String sentinel : sentinels) {
 				String[] hostPort = sentinel.split(":");
 				Jedis jedis = new Jedis(hostPort[0], Integer.parseInt(hostPort[1]));
@@ -79,12 +77,12 @@ public class RedisUtils {
 			}
 		}
 
-		serverConfig.put("maxIdle", propertiesUtils.getProperty("redis.maxIdle", "8"));
-		serverConfig.put("maxTotal", propertiesUtils.getProperty("redis.maxTotal", "8"));
-		serverConfig.put("maxWaitMillis", propertiesUtils.getProperty("redis.maxWaitMillis", "-1"));
-		serverConfig.put("testOnBorrow", propertiesUtils.getProperty("redis.testOnBorrow", "false"));
-		serverConfig.put("testOnReturn", propertiesUtils.getProperty("redis.testOnReturn", "false"));
-		serverConfig.put("testWhileIdle", propertiesUtils.getProperty("redis.testWhileIdle", "false"));
+		serverConfig.put("maxIdle", PropertiesUtils.getProperty(FILE_PATH, "redis.maxIdle", "8"));
+		serverConfig.put("maxTotal", PropertiesUtils.getProperty(FILE_PATH, "redis.maxTotal", "8"));
+		serverConfig.put("maxWaitMillis", PropertiesUtils.getProperty(FILE_PATH, "redis.maxWaitMillis", "-1"));
+		serverConfig.put("testOnBorrow", PropertiesUtils.getProperty(FILE_PATH, "redis.testOnBorrow", "false"));
+		serverConfig.put("testOnReturn", PropertiesUtils.getProperty(FILE_PATH, "redis.testOnReturn", "false"));
+		serverConfig.put("testWhileIdle", PropertiesUtils.getProperty(FILE_PATH, "redis.testWhileIdle", "false"));
 	}
 
 	private void initRedis() {

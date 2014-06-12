@@ -28,7 +28,6 @@ public class QRCodeUtils {
 
 	private static final Hashtable<EncodeHintType, Object> hints = new Hashtable<EncodeHintType, Object>() {
 		private static final long serialVersionUID = 1L;
-
 		{
 			// 编码格式
 			put(EncodeHintType.CHARACTER_SET, "UTF-8");
