@@ -120,6 +120,7 @@ public class Md5Utils {
 		// 字符'a'的MD5码是0cc175b9c0f1b6a831c399e269772661
 		System.out.println(Md5Utils.getMD5("a"));
 		System.out.println(Md5Utils.getMD5String("a"));
+		System.out.println(Md5Utils.getMD5(Md5Utils.getMD5("123456")));
 		// 字符'123456'的MD5码是e10adc3949ba59abbe56e057f20f883e
 		System.out.println(Md5Utils.getMD5String("123456").equals("e10adc3949ba59abbe56e057f20f883e"));
 	}
