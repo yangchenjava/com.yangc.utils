@@ -45,6 +45,9 @@ public class CaptchaUtils {
 		request.getSession().setAttribute(CAPTCHA, code);
 		ServletOutputStream sos = null;
 		try {
+			response.addIntHeader("Expires", 0);
+			response.addHeader("Cache-Control", "no-cache");
+			response.addHeader("Pragma", "no-cache");
 			response.setContentType("image/jpeg");
 			sos = response.getOutputStream();
 			boolean result = ImageIO.write(bi, "jpg", sos);
