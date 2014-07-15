@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -96,6 +97,8 @@ public class WriteExcel {
 		headCellStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
 		headCellStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
 		headCellStyle.setBorderLeft(CellStyle.BORDER_MEDIUM);
+		headCellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
+		headCellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
 		headCellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 		headCellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 
