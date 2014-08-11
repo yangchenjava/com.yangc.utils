@@ -30,10 +30,18 @@
 
 	<repositories>
 		<repository>
+			<id>mvnrepository</id>
+			<url>http://mvnrepository.com/</url>
+		</repository>
+		<repository>
 			<id>central</id>
 			<name>Maven Central</name>
 			<url>http://search.maven.org/</url>
 			<!-- <url>http://127.0.0.1:8081/nexus/content/repositories/central/</url> -->
+		</repository>
+		<repository>
+			<id>sonatype</id>
+			<url>http://repository.sonatype.org/content/groups/public/</url>
 		</repository>
 	</repositories>
 
@@ -48,7 +56,7 @@
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>ojdbc14</artifactId>
-			<version>10.2.0.4.0</version>
+			<version>10.2.0.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
