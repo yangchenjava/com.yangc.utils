@@ -4,45 +4,39 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.safety.Whitelist;
 
-public class HtmlFilterUtils {
+public class JsoupUtils {
 
-	private HtmlFilterUtils() {
+	private JsoupUtils() {
 	}
 
 	/**
-	 * @功能: 根据正则过滤内容
+	 * @功能: 过滤非法标签
 	 * @作者: yangc
-	 * @创建日期: 2014年7月24日 下午3:15:24
+	 * @创建日期: 2014年8月14日 下午6:38:31
 	 * @param html
-	 * @param regex
 	 * @return
 	 */
-	private static String filter(String html, String regex) {
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(html);
-		StringBuffer sb = new StringBuffer();
-		while (matcher.find()) {
-			matcher.appendReplacement(sb, "");
-		}
-		matcher.appendTail(sb);
-		return sb.toString().trim();
+	public static String safe(String html) {
+		return Jsoup.clean(html, Whitelist.relaxed().addTags("label", "span", "div"));
 	}
 
 	/**
 	 * @功能: 过滤html标签
 	 * @作者: yangc
 	 * @创建日期: 2014年7月24日 下午3:00:26
-	 * @param html
+	 * @param content
 	 * @return
 	 */
 	public static String filterHtml(String html) {
 		if (StringUtils.isNotBlank(html)) {
-			return filter(html, "<([^>]*)>");
+			return Jsoup.clean(html, Whitelist.none()).trim();
 		}
 		return null;
 	}
@@ -58,9 +52,13 @@ public class HtmlFilterUtils {
 	public static String filterHtml(String html, String tag) {
 		if (StringUtils.isNotBlank(html)) {
 			if (StringUtils.isBlank(tag)) {
-				return filter(html, "<([^>]*)>");
+				return filterHtml(html);
 			} else {
-				return filter(html, "<\\s*(/?)\\s*" + tag + "\\s*([^>]*)\\s*>");
+				Document doc = Jsoup.parse(html);
+				for (Element el : doc.select(tag)) {
+					html = html.replace(el.outerHtml(), el.text());
+				}
+				return html.trim();
 			}
 		}
 		return null;

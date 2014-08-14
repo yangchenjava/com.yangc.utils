@@ -1,1 +1,6 @@
 ﻿<div class="city-wather"><div class="show-weather"><span class="show-city"><em class="show-city-name">北京：</em></span><span class="show-icon"><span class="weather-icon" style="background-image:url(http://8.su.bdimg.com/icon/weather/aladdin/png_18/a7.png);*background-image:none;*filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src=http://8.su.bdimg.com/icon/weather/aladdin/png_18/a7.png, enabled=true,sizingMethod=" crop")";=""></span><em class="show-icon-temp">30 ~ 25℃</em></span><span class="show-temp"></span></div><a href="http://www.baidu.com/s?wd=%E5%8C%97%E4%BA%AC%E7%A9%BA%E6%B0%94%E8%B4%A8%E9%87%8F%E6%8C%87%E6%95%B0" target="_blank"><div class="show-pollution "><span class="show-vertical">|</span><span class="show-air">空气质量：</span><span class="show-airParm polution-level-30"><em class="show-polution-num">154</em><em class="show-polution-name">中度污染</em></span></div></a></div>
+<pre class="brush:html;toolbar:false">&lt;html&gt;
+&lt;/html&gt;</pre>
+<h6>
+    <span style="font-family: 微软雅黑, &#39;Microsoft YaHei&#39;; font-size: 18px;">sdfasf</span>
+</h6>
