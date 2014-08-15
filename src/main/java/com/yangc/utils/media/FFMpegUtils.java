@@ -102,28 +102,49 @@ public class FFMpegUtils {
 	 * @作者: yangc
 	 * @创建日期: 2014年5月13日 下午6:16:38
 	 * @param ffmpegPath
-	 * @param filePath
-	 * @param flvPath
+	 * @param srcPath
+	 * @param destPath
 	 */
-	public static void convertToFlv(String ffmpegPath, String filePath, String flvPath) {
-		if (!isSupportedType(filePath)) {
+	public static void convertFormat(String ffmpegPath, String srcPath, String destPath, String width, String height) {
+		if (!isSupportedType(srcPath)) {
 			throw new IllegalArgumentException("File type is not supported");
 		}
 
 		List<String> command = new ArrayList<String>();
 		command.add(ffmpegPath);
 		command.add("-i");
-		command.add(filePath);
-		command.add("-y");
+		command.add(srcPath);
 		command.add("-ab");
-		command.add("56");
+		command.add("128");
 		command.add("-ar");
 		command.add("22050");
-		command.add("-b");
-		command.add("500");
+		command.add("-qscale");
+		command.add("6");
+		command.add("-r");
+		command.add("25");
 		command.add("-s");
-		command.add("320*240");
-		command.add(flvPath);
+		command.add(width + "x" + height);
+		command.add(destPath);
+		executeCommand(command);
+	}
+
+	/**
+	 * @功能: 将元信息放到最前面
+	 * @作者: yangc
+	 * @创建日期: 2014年8月15日 下午6:24:36
+	 * @param qtfaststartPath
+	 * @param srcPath
+	 * @param destPath
+	 */
+	public static void fastStart(String qtfaststartPath, String srcPath, String destPath) {
+		if (!isSupportedType(srcPath)) {
+			throw new IllegalArgumentException("File type is not supported");
+		}
+
+		List<String> command = new ArrayList<String>();
+		command.add(qtfaststartPath);
+		command.add(srcPath);
+		command.add(destPath);
 		executeCommand(command);
 	}
 
@@ -171,16 +192,20 @@ public class FFMpegUtils {
 
 	public static void main(String[] args) {
 		String ffmpegPath = "F:/ffmpeg/ffmpeg.exe";
-		String filePath = "F:/ffmpeg/test.mp4";
+		String filePath = "F:/ffmpeg/20140704152149.mp4";
+		String qtfaststartPath = "F:/ffmpeg/qt-faststart.exe";
 
 		int duration = getDuration(ffmpegPath, filePath);
 		System.out.println(duration);
 		int i = duration / 4;
 		for (int j = i; j < duration; j += i) {
-			screenshot(ffmpegPath, filePath, "F:/ffmpeg/test_" + j + ".jpg", j);
+			screenshot(ffmpegPath, filePath, "F:/ddd/test_" + j + ".jpg", j);
 		}
 
-		convertToFlv(ffmpegPath, filePath, "F:/ffmpeg/test.flv");
+		convertFormat(ffmpegPath, filePath, "F:/ddd/test.mp4", "1920", "1080");
+
+		fastStart(qtfaststartPath, "F:/ddd/test.mp4", "F:/ddd/output.mp4");
+		System.out.println("ok");
 	}
 
 }
