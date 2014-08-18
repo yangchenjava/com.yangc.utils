@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
@@ -64,6 +67,30 @@ public class JsoupUtils {
 		return null;
 	}
 
+	/**
+	 * @功能: 根据属性名获取属性值
+	 * @作者: yangc
+	 * @创建日期: 2014年8月18日 上午10:54:34
+	 * @param html
+	 * @param tag
+	 * @param attributeKey
+	 * @return
+	 */
+	public static List<String> getAttributeValue(String html, String tag, String attributeKey) {
+		if (StringUtils.isNotBlank(html) && StringUtils.isNotBlank(tag) && StringUtils.isNotBlank(attributeKey)) {
+			Document doc = Jsoup.parse(html);
+			List<String> list = new ArrayList<String>();
+			for (Element el : doc.select(tag)) {
+				String attributeValue = el.attr(attributeKey);
+				if (StringUtils.isNotBlank(attributeValue)) {
+					list.add(attributeValue);
+				}
+			}
+			return list;
+		}
+		return null;
+	}
+
 	public static void main(String[] args) {
 		BufferedReader br = null;
 		try {
@@ -76,6 +103,7 @@ public class JsoupUtils {
 			br.close();
 			br = null;
 			System.out.println(filterHtml(sb.toString()));
+			System.out.println(Arrays.toString(getAttributeValue(sb.toString(), "span", "style").toArray()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
