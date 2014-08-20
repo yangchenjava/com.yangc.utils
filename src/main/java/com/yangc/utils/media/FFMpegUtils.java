@@ -122,8 +122,10 @@ public class FFMpegUtils {
 		command.add("6");
 		command.add("-r");
 		command.add("25");
-		command.add("-s");
-		command.add(width + "x" + height);
+		if (StringUtils.isNotBlank(width) && StringUtils.isNotBlank(height)) {
+			command.add("-s");
+			command.add(width + "*" + height);
+		}
 		command.add(destPath);
 		executeCommand(command);
 	}
