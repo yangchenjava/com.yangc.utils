@@ -123,6 +123,7 @@ public class Md5Utils {
 		System.out.println(Md5Utils.getMD5(Md5Utils.getMD5("123456")));
 		// 字符'123456'的MD5码是e10adc3949ba59abbe56e057f20f883e
 		System.out.println(Md5Utils.getMD5String("123456").equals("e10adc3949ba59abbe56e057f20f883e"));
+		System.out.println(Md5Utils.getMD5String(new File("src/main/resources/2010-01-04-13-43-51.mp4")).getBytes().length);
 	}
 
 }
