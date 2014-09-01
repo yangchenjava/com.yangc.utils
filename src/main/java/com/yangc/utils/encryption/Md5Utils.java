@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
@@ -11,6 +13,8 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+
+import sun.nio.ch.FileChannelImpl;
 
 public class Md5Utils {
 
@@ -70,9 +74,23 @@ public class Md5Utils {
 				ch = in.getChannel();
 				MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
 				digest.update(byteBuffer);
+				// map之后不能删掉文件(sun bug), 手动unmap可以避开bug
+				Method method = FileChannelImpl.class.getDeclaredMethod("unmap", MappedByteBuffer.class);
+				method.setAccessible(true);
+				method.invoke(FileChannelImpl.class, byteBuffer);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
 				e.printStackTrace();
 			} finally {
 				try {
