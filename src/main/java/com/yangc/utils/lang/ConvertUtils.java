@@ -16,8 +16,8 @@ public class ConvertUtils {
 			char[] hexChars = value.toCharArray();
 			byte[] b = new byte[hexChars.length / 2];
 			for (int i = 0; i < b.length; i++) {
-				byte high = (byte) (HEX.indexOf(hexChars[i * 2]) << 4 & 0xf0);
-				byte low = (byte) (HEX.indexOf(hexChars[i * 2 + 1]) & 0xf);
+				byte high = (byte) (HEX.indexOf(hexChars[i * 2]) << 4 & 0xF0);
+				byte low = (byte) (HEX.indexOf(hexChars[i * 2 + 1]) & 0xF);
 				b[i] = (byte) (high | low);
 			}
 			return b;
@@ -29,7 +29,7 @@ public class ConvertUtils {
 		if (ArrayUtils.isNotEmpty(b)) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < b.length; i++) {
-				String s = Integer.toHexString(b[i] & 0xff);
+				String s = Integer.toHexString(b[i] & 0xFF);
 				if (s.length() == 1) {
 					sb.append("0");
 				}
@@ -43,7 +43,7 @@ public class ConvertUtils {
 	public static byte[] longToByte(long value) {
 		byte[] b = new byte[8];
 		for (int i = 0, len = b.length; i < len; i++) {
-			b[i] = (byte) (value >> (len - i - 1) * 8 & 0xff);
+			b[i] = (byte) (value >> (len - i - 1) * 8 & 0xFF);
 		}
 		return b;
 	}
@@ -51,19 +51,17 @@ public class ConvertUtils {
 	public static long byteToLong(byte[] b) {
 		long value = 0;
 		if (ArrayUtils.isNotEmpty(b)) {
-			for (int i = 0; i < b.length; i++) {
-				value |= ((long) (b[i] & 0xff)) << (i * 8);
+			for (int i = 0, len = b.length; i < len; i++) {
+				value |= ((long) (b[i] & 0xFF)) << (len - i - 1) * 8;
 			}
 		}
 		return value;
 	}
 
 	public static byte[] intToByte(int value) {
-		int tmp = value;
 		byte[] b = new byte[4];
-		for (int i = 0; i < b.length; i++) {
-			b[i] = (byte) (tmp & 0xff);
-			tmp >>= 8;
+		for (int i = 0, len = b.length; i < len; i++) {
+			b[i] = (byte) (value >> (len - i - 1) * 8 & 0xFF);
 		}
 		return b;
 	}
@@ -71,8 +69,8 @@ public class ConvertUtils {
 	public static int byteToInt(byte[] b) {
 		int value = 0;
 		if (ArrayUtils.isNotEmpty(b)) {
-			for (int i = 0; i < b.length; i++) {
-				value |= ((int) (b[i] & 0xff)) << (i * 8);
+			for (int i = 0, len = b.length; i < len; i++) {
+				value |= ((int) (b[i] & 0xFF)) << (len - i - 1) * 8;
 			}
 		}
 		return value;
@@ -81,7 +79,7 @@ public class ConvertUtils {
 	public static byte[] shortToByte(short value) {
 		byte[] b = new byte[2];
 		for (int i = 0, len = b.length; i < len; i++) {
-			b[i] = (byte) (value >> (len - i - 1) * 8 & 0xff);
+			b[i] = (byte) (value >> (len - i - 1) * 8 & 0xFF);
 		}
 		return b;
 	}
@@ -89,8 +87,8 @@ public class ConvertUtils {
 	public static short byteToShort(byte[] b) {
 		short value = 0;
 		if (ArrayUtils.isNotEmpty(b)) {
-			for (int i = 0; i < b.length; i++) {
-				value |= ((short) (b[i] & 0xff)) << (i * 8);
+			for (int i = 0, len = b.length; i < len; i++) {
+				value |= ((short) (b[i] & 0xFF)) << (len - i - 1) * 8;
 			}
 		}
 		return value;
@@ -100,7 +98,7 @@ public class ConvertUtils {
 		long tmp = value;
 		byte[] b = new byte[8];
 		for (int i = 0; i < b.length; i++) {
-			b[i] = (byte) (tmp & 0xff);
+			b[i] = (byte) (tmp & 0xFF);
 			tmp >>= 8;
 		}
 		return b;
@@ -110,7 +108,7 @@ public class ConvertUtils {
 		int tmp = value;
 		byte[] b = new byte[4];
 		for (int i = 0; i < b.length; i++) {
-			b[i] = (byte) (tmp & 0xff);
+			b[i] = (byte) (tmp & 0xFF);
 			tmp >>= 8;
 		}
 		return b;
@@ -120,7 +118,7 @@ public class ConvertUtils {
 		short tmp = value;
 		byte[] b = new byte[2];
 		for (int i = 0; i < b.length; i++) {
-			b[i] = (byte) (tmp & 0xff);
+			b[i] = (byte) (tmp & 0xFF);
 			tmp >>= 8;
 		}
 		return b;
