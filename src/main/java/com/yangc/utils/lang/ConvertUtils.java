@@ -41,11 +41,9 @@ public class ConvertUtils {
 	}
 
 	public static byte[] longToByte(long value) {
-		long tmp = value;
 		byte[] b = new byte[8];
-		for (int i = 0; i < b.length; i++) {
-			b[i] = (byte) (tmp & 0xff);
-			tmp >>= 8;
+		for (int i = 0, len = b.length; i < len; i++) {
+			b[i] = (byte) (value >> (len - i - 1) * 8 & 0xff);
 		}
 		return b;
 	}
@@ -81,11 +79,9 @@ public class ConvertUtils {
 	}
 
 	public static byte[] shortToByte(short value) {
-		short tmp = value;
 		byte[] b = new byte[2];
-		for (int i = 0; i < b.length; i++) {
-			b[i] = (byte) (tmp & 0xff);
-			tmp >>= 8;
+		for (int i = 0, len = b.length; i < len; i++) {
+			b[i] = (byte) (value >> (len - i - 1) * 8 & 0xff);
 		}
 		return b;
 	}
@@ -98,6 +94,36 @@ public class ConvertUtils {
 			}
 		}
 		return value;
+	}
+
+	public static byte[] toLH_long(long value) {
+		long tmp = value;
+		byte[] b = new byte[8];
+		for (int i = 0; i < b.length; i++) {
+			b[i] = (byte) (tmp & 0xff);
+			tmp >>= 8;
+		}
+		return b;
+	}
+
+	public static byte[] toLH_int(int value) {
+		int tmp = value;
+		byte[] b = new byte[4];
+		for (int i = 0; i < b.length; i++) {
+			b[i] = (byte) (tmp & 0xff);
+			tmp >>= 8;
+		}
+		return b;
+	}
+
+	public static byte[] toLH_short(short value) {
+		short tmp = value;
+		byte[] b = new byte[2];
+		for (int i = 0; i < b.length; i++) {
+			b[i] = (byte) (tmp & 0xff);
+			tmp >>= 8;
+		}
+		return b;
 	}
 
 	public static void main(String[] args) {
