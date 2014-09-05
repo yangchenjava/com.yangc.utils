@@ -23,17 +23,6 @@ public class Md5Utils {
 	 */
 	private static final char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
-	private static MessageDigest digest;
-
-	static {
-		try {
-			digest = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
-			System.err.println(Md5Utils.class.getName() + "初始化失败,MessageDigest不支持MD5Utils");
-			e.printStackTrace();
-		}
-	}
-
 	private Md5Utils() {
 	}
 
@@ -46,6 +35,14 @@ public class Md5Utils {
 	 */
 	public static String getMD5(String str) {
 		if (StringUtils.isNotEmpty(str)) {
+			MessageDigest digest = null;
+			try {
+				digest = MessageDigest.getInstance("MD5");
+			} catch (NoSuchAlgorithmException e) {
+				System.err.println(Md5Utils.class.getName() + "初始化失败, MessageDigest不支持Md5Utils");
+				e.printStackTrace();
+			}
+
 			byte[] bytes = str.getBytes();
 			byte[] results = digest.digest(bytes);
 			StringBuilder sb = new StringBuilder();
@@ -67,6 +64,14 @@ public class Md5Utils {
 	 */
 	public static String getMD5String(File file) {
 		if (file != null) {
+			MessageDigest digest = null;
+			try {
+				digest = MessageDigest.getInstance("MD5");
+			} catch (NoSuchAlgorithmException e) {
+				System.err.println(Md5Utils.class.getName() + "初始化失败, MessageDigest不支持Md5Utils");
+				e.printStackTrace();
+			}
+
 			FileInputStream in = null;
 			FileChannel ch = null;
 			try {
@@ -128,6 +133,14 @@ public class Md5Utils {
 
 	public static String getMD5String(byte[] bytes) {
 		if (ArrayUtils.isNotEmpty(bytes)) {
+			MessageDigest digest = null;
+			try {
+				digest = MessageDigest.getInstance("MD5");
+			} catch (NoSuchAlgorithmException e) {
+				System.err.println(Md5Utils.class.getName() + "初始化失败, MessageDigest不支持Md5Utils");
+				e.printStackTrace();
+			}
+
 			digest.update(bytes);
 			return bufferToHex(digest.digest());
 		}
