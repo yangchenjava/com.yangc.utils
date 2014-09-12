@@ -2,6 +2,7 @@ package com.yangc.utils.lang;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.util.Arrays;
 
 public class NumberUtils extends org.apache.commons.lang.math.NumberUtils {
@@ -37,6 +38,23 @@ public class NumberUtils extends org.apache.commons.lang.math.NumberUtils {
 			unit = "" + size;
 		}
 		return unit;
+	}
+
+	/**
+	 * @功能: 格式化成百分数
+	 * @作者: yangc
+	 * @创建日期: 2014年9月12日 上午11:04:03
+	 * @param number
+	 * @param fraction 保留几位小数
+	 * @return
+	 */
+	public static String formatPercent(Number number, int fraction) {
+		if (number != null && fraction >= 0) {
+			NumberFormat nf = NumberFormat.getPercentInstance();
+			nf.setMinimumFractionDigits(fraction);
+			return nf.format(number);
+		}
+		return null;
 	}
 
 	/**
