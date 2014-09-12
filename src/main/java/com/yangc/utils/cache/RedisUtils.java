@@ -29,7 +29,7 @@ public class RedisUtils {
 
 	private static final String FILE_PATH = "/redis.properties";
 
-	/** 分布式模式 */
+	/** 集群模式 */
 	enum Cluster {
 		/** 分片式一致性hash */
 		SHARD("shard"),
@@ -111,14 +111,14 @@ public class RedisUtils {
 	 */
 	private class CheckRedisSentinel implements Runnable {
 		private Jedis jedis;
-		private String masterName;
 		private String masterServer;
+		private String masterName;
 		private long downAfterMilliseconds;
 
 		private CheckRedisSentinel(Jedis jedis, String masterServer, String masterName, long downAfterMilliseconds) {
 			this.jedis = jedis;
-			this.masterName = masterName;
 			this.masterServer = masterServer;
+			this.masterName = masterName;
 			this.downAfterMilliseconds = downAfterMilliseconds;
 		}
 
