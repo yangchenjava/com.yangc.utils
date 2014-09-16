@@ -50,7 +50,7 @@ NumberUtils - 数字工具类<br />
 PinyinUtils - 汉字转拼音
 
 ### media
-FFMpegUtils - 基于ffmpeg的多媒体工具类
+MediaUtils - 基于ffmpeg，qtfaststart，yamdi的多媒体工具类
 
 ### net
 FtpUtils - 操作FTP的工具类<br />

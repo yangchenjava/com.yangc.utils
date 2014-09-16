@@ -11,13 +11,15 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * @功能: 依赖于ffmpeg, 用于获取视频时长, 截图, 转成flv
+ * @功能: 通过ffmpeg, 获取视频时长, 截图, 转成flv
+ * @功能: 通过qtfaststart, 将元信息放到最前面
+ * @功能: 通过yamdi, 在flv中插入关键帧
  * @作者: yangc
  * @创建日期: 2014年5月13日 下午6:12:56
  */
-public class FFMpegUtils {
+public class MediaUtils {
 
-	private FFMpegUtils() {
+	private MediaUtils() {
 	}
 
 	/**
@@ -138,13 +140,33 @@ public class FFMpegUtils {
 	 * @param srcPath
 	 * @param destPath
 	 */
-	public static void fastStart(String qtfaststartPath, String srcPath, String destPath) {
+	public static void qtfaststart(String qtfaststartPath, String srcPath, String destPath) {
 		if (!isSupportedType(srcPath)) {
 			throw new IllegalArgumentException("File type is not supported");
 		}
 
 		List<String> command = new ArrayList<String>();
 		command.add(qtfaststartPath);
+		command.add(srcPath);
+		command.add(destPath);
+		executeCommand(command);
+	}
+
+	/**
+	 * @功能: 在flv中插入关键帧
+	 * @作者: yangc
+	 * @创建日期: 2014年9月16日 上午10:55:13
+	 * @param yamdiPath
+	 * @param srcPath
+	 * @param destPath
+	 */
+	public static void yamdi(String yamdiPath, String srcPath, String destPath) {
+		if (!StringUtils.endsWith(yamdiPath, "flv")) {
+			throw new IllegalArgumentException("File type is not supported");
+		}
+
+		List<String> command = new ArrayList<String>();
+		command.add(yamdiPath);
 		command.add(srcPath);
 		command.add(destPath);
 		executeCommand(command);
@@ -206,7 +228,7 @@ public class FFMpegUtils {
 
 		convertFormat(ffmpegPath, filePath, "F:/ddd/test.mp4", "1920", "1080");
 
-		fastStart(qtfaststartPath, "F:/ddd/test.mp4", "F:/ddd/output.mp4");
+		qtfaststart(qtfaststartPath, "F:/ddd/test.mp4", "F:/ddd/output.mp4");
 		System.out.println("ok");
 	}
 
