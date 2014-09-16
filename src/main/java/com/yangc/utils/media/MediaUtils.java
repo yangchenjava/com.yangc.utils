@@ -161,7 +161,7 @@ public class MediaUtils {
 	 * @param destPath
 	 */
 	public static void yamdi(String yamdiPath, String srcPath, String destPath) {
-		if (!StringUtils.endsWith(yamdiPath, "flv")) {
+		if (!StringUtils.endsWith(srcPath, "flv")) {
 			throw new IllegalArgumentException("File type is not supported");
 		}
 
