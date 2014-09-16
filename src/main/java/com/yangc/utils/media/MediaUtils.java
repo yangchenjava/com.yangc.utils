@@ -167,7 +167,9 @@ public class MediaUtils {
 
 		List<String> command = new ArrayList<String>();
 		command.add(yamdiPath);
+		command.add("-i");
 		command.add(srcPath);
+		command.add("-o");
 		command.add(destPath);
 		executeCommand(command);
 	}
