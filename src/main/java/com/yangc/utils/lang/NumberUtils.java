@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Arrays;
 
-public class NumberUtils extends org.apache.commons.lang.math.NumberUtils {
+public class NumberUtils extends org.apache.commons.lang3.math.NumberUtils {
 
 	private static final double KB = 1024D;
 	private static final double MB = 1024D * 1024D;

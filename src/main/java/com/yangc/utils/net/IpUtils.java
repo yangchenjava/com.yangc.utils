@@ -2,7 +2,7 @@ package com.yangc.utils.net;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class IpUtils {
 

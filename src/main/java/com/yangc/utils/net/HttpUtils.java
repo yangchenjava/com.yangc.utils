@@ -2,6 +2,7 @@ package com.yangc.utils.net;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -13,19 +14,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.CoreConnectionPNames;
 
 public class HttpUtils {
 
@@ -44,8 +47,8 @@ public class HttpUtils {
 	public static String sendGet(String uri, Map<String, String> paramsMap) {
 		String params = "";
 		if (paramsMap != null && !paramsMap.isEmpty()) {
-			for (Entry<String, String> en : paramsMap.entrySet()) {
-				params += "&" + en.getKey() + "=" + en.getValue();
+			for (Entry<String, String> entry : paramsMap.entrySet()) {
+				params += "&" + entry.getKey() + "=" + entry.getValue();
 			}
 		}
 		if (StringUtils.isNotBlank(params)) {
@@ -103,8 +106,8 @@ public class HttpUtils {
 	public static String sendPost(String uri, Map<String, String> paramsMap) {
 		String params = "";
 		if (paramsMap != null && !paramsMap.isEmpty()) {
-			for (Entry<String, String> en : paramsMap.entrySet()) {
-				params += "&" + en.getKey() + "=" + en.getValue();
+			for (Entry<String, String> entry : paramsMap.entrySet()) {
+				params += "&" + entry.getKey() + "=" + entry.getValue();
 			}
 		}
 
@@ -172,8 +175,8 @@ public class HttpUtils {
 		String params = null;
 		if (paramsMap != null && !paramsMap.isEmpty()) {
 			List<BasicNameValuePair> paramsList = new ArrayList<BasicNameValuePair>();
-			for (Entry<String, String> en : paramsMap.entrySet()) {
-				paramsList.add(new BasicNameValuePair(en.getKey(), en.getValue()));
+			for (Entry<String, String> entry : paramsMap.entrySet()) {
+				paramsList.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
 			}
 			params = URLEncodedUtils.format(paramsList, UTF_8);
 		}
@@ -181,17 +184,16 @@ public class HttpUtils {
 			uri += "?" + params;
 		}
 
+		CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
 		HttpGet httpGet = new HttpGet(uri);
-		HttpClient httpClient = new DefaultHttpClient();
-		httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, TIMEOUT);
-		httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, TIMEOUT);
+		httpGet.setConfig(RequestConfig.custom().setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).build());
 		BufferedReader br = null;
-		StringBuilder sb = new StringBuilder();
 		try {
-			HttpResponse httpResponse = httpClient.execute(httpGet);
+			HttpResponse httpResponse = closeableHttpClient.execute(httpGet);
 			if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-				br = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), UTF_8));
 				String str = null;
+				StringBuilder sb = new StringBuilder();
+				br = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), UTF_8));
 				while ((str = br.readLine()) != null) {
 					sb.append(str.trim());
 				}
@@ -207,6 +209,7 @@ public class HttpUtils {
 					br.close();
 					br = null;
 				}
+				closeableHttpClient.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -219,30 +222,29 @@ public class HttpUtils {
 	 * @作者: yangc
 	 * @创建日期: 2013-1-9 上午11:31:24
 	 */
-	public static String sendApachePost(String uri, Map<String, String> paramsMap) {
-		List<BasicNameValuePair> paramsList = null;
+	public static String sendApachePost(String uri, Map<String, Object> paramsMap) {
+		CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
+		HttpPost httpPost = new HttpPost(uri);
+		httpPost.setConfig(RequestConfig.custom().setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).build());
+
+		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 		if (paramsMap != null && !paramsMap.isEmpty()) {
-			paramsList = new ArrayList<BasicNameValuePair>();
-			for (Entry<String, String> en : paramsMap.entrySet()) {
-				paramsList.add(new BasicNameValuePair(en.getKey(), en.getValue()));
+			for (Entry<String, Object> entry : paramsMap.entrySet()) {
+				if (entry.getValue() instanceof File) {
+					multipartEntityBuilder.addBinaryBody(entry.getKey(), (File) entry.getValue());
+				} else {
+					multipartEntityBuilder.addTextBody(entry.getKey(), entry.getValue().toString(), ContentType.create("text/plain", UTF_8));
+				}
 			}
 		}
-
-		HttpPost httpPost = new HttpPost(uri);
-		httpPost.setHeader("content-type", "application/json;charset=utf-8");
-		HttpClient httpClient = new DefaultHttpClient();
-		httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, TIMEOUT);
-		httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, TIMEOUT);
+		httpPost.setEntity(multipartEntityBuilder.build());
 		BufferedReader br = null;
-		StringBuilder sb = new StringBuilder();
 		try {
-			if (paramsList != null && !paramsList.isEmpty()) {
-				httpPost.setEntity(new UrlEncodedFormEntity(paramsList, UTF_8));
-			}
-			HttpResponse httpResponse = httpClient.execute(httpPost);
+			HttpResponse httpResponse = closeableHttpClient.execute(httpPost);
 			if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-				br = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), UTF_8));
 				String str = null;
+				StringBuilder sb = new StringBuilder();
+				br = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), UTF_8));
 				while ((str = br.readLine()) != null) {
 					sb.append(str.trim());
 				}
@@ -260,6 +262,7 @@ public class HttpUtils {
 					br.close();
 					br = null;
 				}
+				closeableHttpClient.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -277,20 +280,19 @@ public class HttpUtils {
 		// System.out.println(HttpUtils.sendApacheGet(uri, paramsMap));
 		// System.out.println(HttpUtils.sendApachePost(uri, paramsMap));
 
+		CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost("http://127.0.0.1:81/drvrec-uc-ws/ws/0.1/user/login");
-		httpPost.setHeader("Content-Type", "application/json;Charset=UTF-8");
+		httpPost.setConfig(RequestConfig.custom().setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).build());
+		httpPost.setEntity(new StringEntity("{\"mobile\":\"13718922561\", \"password\":\"123456\", \"imei\":\"ddd\"}", UTF_8));
+		httpPost.setHeader("Content-Type", "application/json; Charset=UTF-8");
 		httpPost.setHeader("Cookie", "SSOcookie=7ec87bd3-ca72-46b0-b23c-0b681fd55791");
-		HttpClient httpClient = new DefaultHttpClient();
-		httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, TIMEOUT);
-		httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, TIMEOUT);
 		BufferedReader br = null;
-		StringBuilder sb = new StringBuilder();
 		try {
-			httpPost.setEntity(new StringEntity("{\"mobile\":\"13718922561\", \"password\":\"123456\", \"imei\":\"ddd\"}", UTF_8));
-			HttpResponse httpResponse = httpClient.execute(httpPost);
+			HttpResponse httpResponse = closeableHttpClient.execute(httpPost);
 			if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-				br = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), UTF_8));
 				String str = null;
+				StringBuilder sb = new StringBuilder();
+				br = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), UTF_8));
 				while ((str = br.readLine()) != null) {
 					sb.append(str.trim());
 				}
@@ -308,9 +310,11 @@ public class HttpUtils {
 					br.close();
 					br = null;
 				}
+				closeableHttpClient.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
+
 }

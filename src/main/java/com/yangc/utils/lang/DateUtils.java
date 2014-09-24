@@ -3,7 +3,7 @@ package com.yangc.utils.lang;
 import java.util.Calendar;
 import java.util.Date;
 
-public class DateUtils extends org.apache.commons.lang.time.DateUtils {
+public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
 	private DateUtils() {
 	}
