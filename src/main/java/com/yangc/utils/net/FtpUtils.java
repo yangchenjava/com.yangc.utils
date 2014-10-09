@@ -116,10 +116,15 @@ public class FtpUtils {
 			client.ascii(); // 使用ascii模式发送命令
 			client.sendServer("MKD " + dirName + "\r\n");
 			client.readServerResponse();
-			client.binary();
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				client.binary();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return false;
 	}
@@ -141,10 +146,15 @@ public class FtpUtils {
 			client.ascii(); // 使用ascii模式发送命令
 			client.sendServer("DELE " + fileName + "\r\n");
 			client.readServerResponse();
-			client.binary();
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				client.binary();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return false;
 	}
@@ -178,7 +188,6 @@ public class FtpUtils {
 		TelnetOutputStream tos = null;
 		try {
 			client.cd(path);
-			client.binary();
 			for (File file : files) {
 				len = -1;
 				b = new byte[BUFFER_SIZE];
@@ -238,7 +247,6 @@ public class FtpUtils {
 		BufferedOutputStream bos = null;
 		try {
 			client.cd(srcPath);
-			client.binary();
 			for (String fileName : fileNames) {
 				len = -1;
 				b = new byte[BUFFER_SIZE];

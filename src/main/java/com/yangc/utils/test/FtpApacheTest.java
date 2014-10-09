@@ -1,9 +1,11 @@
 package com.yangc.utils.test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 
 import com.yangc.utils.net.FtpUtilsApache;
 
@@ -12,7 +14,11 @@ public class FtpApacheTest {
 	public static void main(String[] args) {
 		FtpUtilsApache ftp = new FtpUtilsApache();
 		FTPClient client = ftp.login("10.23.102.92", 21, "video", "clt");
-		List<String> fileNameList = ftp.getFileNameList(client, "/opt/video/test");
+		List<String> fileNameList = new ArrayList<String>();
+		for (FTPFile file : ftp.getFTPFiles(client, "/opt/video/test")) {
+			fileNameList.add(file.getName());
+			System.out.println(file.getName() + " == " + file.getSize());
+		}
 		System.out.println(fileNameList.toString());
 		System.out.println(fileNameList.size());
 		if (fileNameList.contains("test.mp4")) {

@@ -7,11 +7,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 
 public class FtpUtilsApache {
 
@@ -65,21 +65,21 @@ public class FtpUtilsApache {
 	}
 
 	/**
-	 * @功能: 获取指定路径下的文件名列表
+	 * @功能: 获取指定路径下的文件列表
 	 * @作者: yangc
 	 * @创建日期: 2013-11-21 下午03:31:51
 	 */
-	public List<String> getFileNameList(FTPClient client, String path) {
+	public FTPFile[] getFTPFiles(FTPClient client, String path) {
 		if (client == null || !client.isConnected()) {
 			throw new IllegalArgumentException("FtpClient has bean closed!");
 		}
 
 		try {
-			return Arrays.asList(client.listNames(path));
+			return client.listFiles(path);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new ArrayList<String>();
+		return new FTPFile[] {};
 	}
 
 	/**
