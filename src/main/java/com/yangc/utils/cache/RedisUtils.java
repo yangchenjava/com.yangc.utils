@@ -541,4 +541,48 @@ public class RedisUtils {
 		return null;
 	}
 
+	/**
+	 * @功能: 获取hashmap中所有的key
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午11:33:56
+	 * @param key
+	 * @return
+	 */
+	public Set<String> getHashMapKeys(String key) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			logger.debug(this.getHost(jedis, key));
+			return jedis.hkeys(key);
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return null;
+	}
+
+	/**
+	 * @功能: 获取hashmap中所有的value
+	 * @作者: yangc
+	 * @创建日期: 2014年6月6日 上午11:33:56
+	 * @param key
+	 * @return
+	 */
+	public List<String> getHashMapValues(String key) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			logger.debug(this.getHost(jedis, key));
+			return jedis.hvals(key);
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return null;
+	}
+
 }
