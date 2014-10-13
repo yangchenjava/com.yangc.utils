@@ -14,8 +14,9 @@ public class FtpApacheTest {
 	public static void main(String[] args) {
 		FtpUtilsApache ftp = new FtpUtilsApache();
 		FTPClient client = ftp.login("10.23.102.92", 21, "video", "clt");
+		System.out.println("mkdir=" + ftp.mkDir(client, "/opt/video", "13718922561"));
 		List<String> fileNameList = new ArrayList<String>();
-		for (FTPFile file : ftp.getFTPFiles(client, "/opt/video/test")) {
+		for (FTPFile file : ftp.getFTPFiles(client, "/opt/video/13718922561")) {
 			fileNameList.add(file.getName());
 			System.out.println(file.getName() + " == " + file.getSize());
 		}

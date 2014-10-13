@@ -15,6 +15,12 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.Thumbnails.Builder;
+import net.coobird.thumbnailator.geometry.Position;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
@@ -101,6 +107,59 @@ public class ImageUtils {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 处理图片
+	 * @作者: yangc
+	 * @创建日期: 2014年10月13日 下午3:16:40
+	 * @param srcImagePath 原图路径
+	 * @param width 缩放的宽
+	 * @param height 缩放的高
+	 * @param keep 是否保持原图对比度
+	 * @param angle 旋转角度(0不旋转,正数顺时针旋转,负数逆时针旋转)
+	 * @param watermarkPath 水印图路径(null不打水印)
+	 * @param position 水印位置
+	 * @param opacity 水印透明度
+	 * @param destImagePath 处理后保存路径
+	 */
+	public static boolean process(String srcImagePath, int width, int height, boolean keep, double angle, String watermarkPath, Position position, float opacity, String destImagePath) {
+		try {
+			Builder<File> builder = Thumbnails.of(srcImagePath).size(width, height).keepAspectRatio(keep);
+			if (angle != 0) {
+				builder.rotate(angle);
+			}
+			if (StringUtils.isNotBlank(watermarkPath)) {
+				builder.watermark(position, ImageIO.read(new File(watermarkPath)), opacity);
+			}
+			builder.toFile(destImagePath);
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 截图
+	 * @作者: yangc
+	 * @创建日期: 2014年10月13日 下午3:29:53
+	 * @param srcImagePath 原图路径
+	 * @param x x坐标
+	 * @param y y坐标
+	 * @param width 截取的宽
+	 * @param height 截取的高
+	 * @param destImagePath 截图路径
+	 * @return
+	 */
+	public static boolean screenshot(String srcImagePath, int x, int y, int width, int height, String destImagePath) {
+		try {
+			Thumbnails.of(srcImagePath).sourceRegion(x, y, width, height).toFile(destImagePath);
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return false;
 	}

@@ -11,7 +11,7 @@ public class FtpTest {
 
 	public static void main(String[] args) {
 		FtpUtils ftp = new FtpUtils();
-		FtpClient client = ftp.login("10.23.101.92", 21, "video", "clt");
+		FtpClient client = ftp.login("10.23.102.92", 21, "video", "clt");
 
 		List<String> fileNameList = ftp.getFileNameList(client, "/opt/video");
 		for (String fileName : fileNameList) {
