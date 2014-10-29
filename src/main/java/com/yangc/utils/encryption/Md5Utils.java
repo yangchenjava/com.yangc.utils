@@ -47,7 +47,7 @@ public class Md5Utils {
 			byte[] results = digest.digest(bytes);
 			StringBuilder sb = new StringBuilder();
 			for (byte result : results) {
-				// 将byte数组转化为16进制字符存入stringbuilder中
+				// 将byte数组转化为16进制字符存入StringBuilder中
 				sb.append(String.format("%02x", result));
 			}
 			return sb.toString();
