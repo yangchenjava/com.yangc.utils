@@ -122,7 +122,7 @@ public class ImageUtils {
 	 * @param angle 旋转角度(0不旋转,正数顺时针旋转,负数逆时针旋转)
 	 * @param watermarkPath 水印图路径(null不打水印)
 	 * @param position 水印位置
-	 * @param opacity 水印透明度
+	 * @param opacity 水印透明度,0.0f全透,1.0f不透
 	 * @param destImagePath 处理后保存路径
 	 */
 	public static boolean process(String srcImagePath, int width, int height, boolean keep, double angle, String watermarkPath, Position position, float opacity, String destImagePath) {

@@ -47,6 +47,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.yangc</groupId>
+			<artifactId>com.yangc.zxing</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
@@ -157,11 +162,6 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.zxing</groupId>
-			<artifactId>javase</artifactId>
-			<version>1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
