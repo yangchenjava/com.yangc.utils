@@ -42,15 +42,16 @@ public class Md5Utils {
 				System.err.println(Md5Utils.class.getName() + "初始化失败, MessageDigest不支持Md5Utils");
 				e.printStackTrace();
 			}
-
-			byte[] bytes = str.getBytes();
-			byte[] results = digest.digest(bytes);
-			StringBuilder sb = new StringBuilder();
-			for (byte result : results) {
-				// 将byte数组转化为16进制字符存入StringBuilder中
-				sb.append(String.format("%02x", result));
+			if (digest != null) {
+				byte[] bytes = str.getBytes();
+				byte[] results = digest.digest(bytes);
+				StringBuilder sb = new StringBuilder();
+				for (byte result : results) {
+					// 将byte数组转化为16进制字符存入StringBuilder中
+					sb.append(String.format("%02x", result));
+				}
+				return sb.toString();
 			}
-			return sb.toString();
 		}
 		return null;
 	}
@@ -71,41 +72,42 @@ public class Md5Utils {
 				System.err.println(Md5Utils.class.getName() + "初始化失败, MessageDigest不支持Md5Utils");
 				e.printStackTrace();
 			}
-
-			FileInputStream in = null;
-			FileChannel ch = null;
-			try {
-				in = new FileInputStream(file);
-				ch = in.getChannel();
-				MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
-				digest.update(byteBuffer);
-				// map之后不能删掉文件(sun bug), 手动unmap可以避开bug
-				Method method = FileChannelImpl.class.getDeclaredMethod("unmap", MappedByteBuffer.class);
-				method.setAccessible(true);
-				method.invoke(FileChannelImpl.class, byteBuffer);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			} finally {
+			if (digest != null) {
+				FileInputStream in = null;
+				FileChannel ch = null;
 				try {
-					if (ch != null) ch.close();
-					if (in != null) in.close();
+					in = new FileInputStream(file);
+					ch = in.getChannel();
+					MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+					digest.update(byteBuffer);
+					// map之后不能删掉文件(sun bug), 手动unmap可以避开bug
+					Method method = FileChannelImpl.class.getDeclaredMethod("unmap", MappedByteBuffer.class);
+					method.setAccessible(true);
+					method.invoke(FileChannelImpl.class, byteBuffer);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				} finally {
+					try {
+						if (ch != null) ch.close();
+						if (in != null) in.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
+				return bufferToHex(digest.digest());
 			}
-			return bufferToHex(digest.digest());
 		}
 		return null;
 	}
@@ -140,9 +142,10 @@ public class Md5Utils {
 				System.err.println(Md5Utils.class.getName() + "初始化失败, MessageDigest不支持Md5Utils");
 				e.printStackTrace();
 			}
-
-			digest.update(bytes);
-			return bufferToHex(digest.digest());
+			if (digest != null) {
+				digest.update(bytes);
+				return bufferToHex(digest.digest());
+			}
 		}
 		return null;
 	}
