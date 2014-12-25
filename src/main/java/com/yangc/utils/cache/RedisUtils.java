@@ -9,15 +9,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPipeline;
 import redis.clients.jedis.ShardedJedisPool;
+import redis.clients.jedis.Tuple;
 
 import com.google.gson.reflect.TypeToken;
 import com.yangc.utils.json.JsonUtils;
@@ -49,12 +52,17 @@ public class RedisUtils {
 	}
 
 	private static List<String> servers;
-	private static final Map<String, String> serverConfig = new HashMap<String, String>();
+	private static final Map<String, String> SERVER_CONFIG = new HashMap<String, String>();
 
 	private static ShardedJedisPool pool;
 
-	private static RedisUtils redisUtils;
+	private static RedisUtils instance;
 
+	/**
+	 * @功能: 初始化配置文件
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 上午10:41:45
+	 */
 	private void initConfig() {
 		String cluster = PropertiesUtils.getProperty(FILE_PATH, "redis.cluster");
 		// 只采用分片式一致性hash
@@ -77,22 +85,27 @@ public class RedisUtils {
 			}
 		}
 
-		serverConfig.put("maxIdle", PropertiesUtils.getProperty(FILE_PATH, "redis.maxIdle", "8"));
-		serverConfig.put("maxTotal", PropertiesUtils.getProperty(FILE_PATH, "redis.maxTotal", "8"));
-		serverConfig.put("maxWaitMillis", PropertiesUtils.getProperty(FILE_PATH, "redis.maxWaitMillis", "-1"));
-		serverConfig.put("testOnBorrow", PropertiesUtils.getProperty(FILE_PATH, "redis.testOnBorrow", "false"));
-		serverConfig.put("testOnReturn", PropertiesUtils.getProperty(FILE_PATH, "redis.testOnReturn", "false"));
-		serverConfig.put("testWhileIdle", PropertiesUtils.getProperty(FILE_PATH, "redis.testWhileIdle", "false"));
+		SERVER_CONFIG.put("maxIdle", PropertiesUtils.getProperty(FILE_PATH, "redis.maxIdle", "8"));
+		SERVER_CONFIG.put("maxTotal", PropertiesUtils.getProperty(FILE_PATH, "redis.maxTotal", "8"));
+		SERVER_CONFIG.put("maxWaitMillis", PropertiesUtils.getProperty(FILE_PATH, "redis.maxWaitMillis", "-1"));
+		SERVER_CONFIG.put("testOnBorrow", PropertiesUtils.getProperty(FILE_PATH, "redis.testOnBorrow", "false"));
+		SERVER_CONFIG.put("testOnReturn", PropertiesUtils.getProperty(FILE_PATH, "redis.testOnReturn", "false"));
+		SERVER_CONFIG.put("testWhileIdle", PropertiesUtils.getProperty(FILE_PATH, "redis.testWhileIdle", "false"));
 	}
 
+	/**
+	 * @功能: 初始化redis
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 上午10:42:07
+	 */
 	private void initRedis() {
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
-		poolConfig.setMaxIdle(Integer.parseInt(serverConfig.get("maxIdle")));
-		poolConfig.setMaxTotal(Integer.parseInt(serverConfig.get("maxTotal")));
-		poolConfig.setMaxWaitMillis(Long.parseLong(serverConfig.get("maxWaitMillis")));
-		poolConfig.setTestOnBorrow(Boolean.parseBoolean(serverConfig.get("testOnBorrow")));
-		poolConfig.setTestOnReturn(Boolean.parseBoolean(serverConfig.get("testOnReturn")));
-		poolConfig.setTestWhileIdle(Boolean.parseBoolean(serverConfig.get("testWhileIdle")));
+		poolConfig.setMaxIdle(MapUtils.getIntValue(SERVER_CONFIG, "maxIdle"));
+		poolConfig.setMaxTotal(MapUtils.getIntValue(SERVER_CONFIG, "maxTotal"));
+		poolConfig.setMaxWaitMillis(MapUtils.getLongValue(SERVER_CONFIG, "maxWaitMillis"));
+		poolConfig.setTestOnBorrow(MapUtils.getBooleanValue(SERVER_CONFIG, "testOnBorrow"));
+		poolConfig.setTestOnReturn(MapUtils.getBooleanValue(SERVER_CONFIG, "testOnReturn"));
+		poolConfig.setTestWhileIdle(MapUtils.getBooleanValue(SERVER_CONFIG, "testWhileIdle"));
 
 		List<JedisShardInfo> shards = new ArrayList<JedisShardInfo>(servers.size());
 		for (String server : servers) {
@@ -158,11 +171,13 @@ public class RedisUtils {
 	}
 
 	public synchronized static RedisUtils getInstance() {
-		if (redisUtils == null) {
-			redisUtils = new RedisUtils();
+		if (instance == null) {
+			instance = new RedisUtils();
 		}
-		return redisUtils;
+		return instance;
 	}
+
+	/** ----------------------------------------- Server ------------------------------------------- */
 
 	/**
 	 * @功能: 获取jedis资源
@@ -211,8 +226,10 @@ public class RedisUtils {
 		return shard.getHost() + ":" + shard.getPort();
 	}
 
+	/** ----------------------------------------- String ------------------------------------------- */
+
 	/**
-	 * @功能: 获取所有满足条件的key
+	 * @功能: 获取所有满足条件的key(慎用,低效)
 	 * @作者: yangc
 	 * @创建日期: 2014年6月9日 下午2:18:04
 	 * @param pattern
@@ -382,7 +399,7 @@ public class RedisUtils {
 		return false;
 	}
 
-	/** ----------------------------- 操作队列 ------------------------------ */
+	/** ----------------------------------------- Queue(FIFO) ------------------------------------------- */
 
 	/**
 	 * @功能: 插入队列
@@ -437,7 +454,7 @@ public class RedisUtils {
 		return null;
 	}
 
-	/** ----------------------------- 操作栈 ------------------------------ */
+	/** ----------------------------------------- Stack(FILO) ------------------------------------------- */
 
 	/**
 	 * @功能: 压栈
@@ -492,7 +509,7 @@ public class RedisUtils {
 		return null;
 	}
 
-	/** ----------------------------- 操作hashmap ------------------------------ */
+	/** ----------------------------------------- Hash ------------------------------------------- */
 
 	/**
 	 * @功能: 设置hashmap
@@ -583,6 +600,189 @@ public class RedisUtils {
 			pool.returnResource(jedis);
 		}
 		return null;
+	}
+
+	/** ----------------------------------------- SortedSet ------------------------------------------- */
+
+	/**
+	 * @功能: 设置SortedSet
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 下午6:03:16
+	 * @param key
+	 * @param map
+	 * @return
+	 */
+	public boolean zadd(String key, Map<String, Double> map) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			logger.debug(this.getHost(jedis, key));
+			jedis.zadd(key, map);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 为member的score加上增量increment
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 下午6:04:19
+	 * @param key
+	 * @param increment
+	 * @param member
+	 * @return
+	 */
+	public boolean zincrby(String key, double increment, String member) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			logger.debug(this.getHost(jedis, key));
+			jedis.zincrby(key, increment, member);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 删除下标为start到end的记录(包含start和stop)
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 下午6:05:52
+	 * @param key
+	 * @param start 从0开始,-1表示最后一个成员,-2表示倒数第二个成员,以此类推
+	 * @param end
+	 * @return
+	 */
+	public boolean zremrangeByRank(String key, long start, long end) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			logger.debug(this.getHost(jedis, key));
+			jedis.zremrangeByRank(key, start, end);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 按倒序取下标为start到end的记录(包含start和stop)
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 下午6:08:44
+	 * @param key
+	 * @param start 从0开始,-1表示最后一个成员,-2表示倒数第二个成员,以此类推
+	 * @param end
+	 * @return
+	 */
+	public Set<Tuple> zrevrangeWithScores(String key, long start, long end) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			logger.debug(this.getHost(jedis, key));
+			return jedis.zrevrangeWithScores(key, start, end);
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return null;
+	}
+
+	/**
+	 * @功能: 按倒序取SortedSet中对应key和member的下标
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 下午6:10:00
+	 * @param key
+	 * @param member
+	 * @return
+	 */
+	public Long zrevrank(String key, String member) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			logger.debug(this.getHost(jedis, key));
+			return jedis.zrevrank(key, member);
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return null;
+	}
+
+	/** ----------------------------------------- Pub/Sub ------------------------------------------- */
+
+	/**
+	 * @功能: 从指定通道订阅消息
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 下午8:53:17
+	 * @param jedisPubSub
+	 * @param channel
+	 * @return
+	 */
+	public boolean subscribe(JedisPubSub jedisPubSub, String channel) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			logger.debug(this.getHost(jedis, channel));
+			jedis.getShard(channel).subscribe(jedisPubSub, channel);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 取消订阅
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 下午8:53:34
+	 * @param jedisPubSub
+	 */
+	public void unsubscribe(JedisPubSub jedisPubSub) {
+		jedisPubSub.unsubscribe();
+	}
+
+	/**
+	 * @功能: 指定通道发送消息
+	 * @作者: yangc
+	 * @创建日期: 2014年12月25日 下午8:53:44
+	 * @param channel
+	 * @param message
+	 * @return
+	 */
+	public boolean publish(String channel, String message) {
+		ShardedJedis jedis = null;
+		try {
+			jedis = pool.getResource();
+			logger.debug(this.getHost(jedis, channel));
+			jedis.getShard(channel).publish(channel, message);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			pool.returnBrokenResource(jedis);
+		} finally {
+			pool.returnResource(jedis);
+		}
+		return false;
 	}
 
 }

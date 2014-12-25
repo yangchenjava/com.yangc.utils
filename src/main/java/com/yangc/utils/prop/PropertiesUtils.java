@@ -15,7 +15,7 @@ public class PropertiesUtils {
 
 	private static final String UTF_8 = "UTF-8";
 
-	private static final Map<String, Properties> props = new HashMap<String, Properties>();
+	private static final Map<String, Properties> PROPS = new HashMap<String, Properties>();
 
 	private PropertiesUtils() {
 	}
@@ -33,11 +33,11 @@ public class PropertiesUtils {
 			throw new IllegalArgumentException("The parameters must not be null");
 		}
 		try {
-			Properties prop = props.get(filePath);
+			Properties prop = PROPS.get(filePath);
 			if (prop == null) {
 				prop = new Properties();
 				prop.load(PropertiesUtils.class.getResourceAsStream(filePath));
-				props.put(filePath, prop);
+				PROPS.put(filePath, prop);
 			}
 			return prop.getProperty(name);
 		} catch (FileNotFoundException e) {
@@ -62,11 +62,11 @@ public class PropertiesUtils {
 			throw new IllegalArgumentException("The parameters must not be null");
 		}
 		try {
-			Properties prop = props.get(filePath);
+			Properties prop = PROPS.get(filePath);
 			if (prop == null) {
 				prop = new Properties();
 				prop.load(PropertiesUtils.class.getResourceAsStream(filePath));
-				props.put(filePath, prop);
+				PROPS.put(filePath, prop);
 			}
 			String value = prop.getProperty(name);
 			return StringUtils.isBlank(value) ? defaultValue : value;
@@ -93,12 +93,12 @@ public class PropertiesUtils {
 		}
 		BufferedWriter bw = null;
 		try {
-			synchronized (props) {
-				Properties prop = props.get(filePath);
+			synchronized (PROPS) {
+				Properties prop = PROPS.get(filePath);
 				if (prop == null) {
 					prop = new Properties();
 					prop.load(PropertiesUtils.class.getResourceAsStream(filePath));
-					props.put(filePath, prop);
+					PROPS.put(filePath, prop);
 				}
 				prop.put(name, value);
 				bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(PropertiesUtils.class.getResource(filePath).getFile()), UTF_8));
