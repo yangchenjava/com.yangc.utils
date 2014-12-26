@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -138,7 +140,9 @@ public class ReadExcel2007 {
 					value = new XSSFRichTextString(this.sst.getEntryAt(Integer.parseInt(this.lastContents.toString()))).getString();
 					break;
 				case NUMBER:
-					if (StringUtils.isBlank(this.formatString)) {
+					if (HSSFDateUtil.isADateFormat(this.formatIndex, this.formatString)) {
+						value = DateFormatUtils.format(HSSFDateUtil.getJavaDate(Double.parseDouble(this.lastContents.toString())), "yyyy-MM-dd");
+					} else if (StringUtils.isBlank(this.formatString)) {
 						value = this.lastContents.toString();
 					} else {
 						value = df.formatRawCellContents(Double.parseDouble(this.lastContents.toString()), formatIndex, formatString);

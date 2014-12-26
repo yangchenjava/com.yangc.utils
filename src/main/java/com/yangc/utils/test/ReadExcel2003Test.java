@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections.MapUtils;
 
 import com.yangc.utils.excel.ReadExcel2003;
 
@@ -17,15 +17,19 @@ public class ReadExcel2003Test {
 		headNames.put(2, "test_2");
 		headNames.put(3, "test_3");
 		headNames.put(4, "test_4");
+		headNames.put(5, "test_5");
+		headNames.put(6, "test_6");
 
 		ReadExcel2003 excel = new ReadExcel2003();
 		List<Map<String, String>> list = excel.read("src/main/resources/test.xls", headNames, 0);
 		for (Map<String, String> map : list) {
-			System.out.print(StringUtils.isBlank(map.get("test_0")) ? "" : map.get("test_0") + "\t");
-			System.out.print(StringUtils.isBlank(map.get("test_1")) ? "" : map.get("test_1") + "\t");
-			System.out.print(StringUtils.isBlank(map.get("test_2")) ? "" : map.get("test_2") + "\t");
-			System.out.print(StringUtils.isBlank(map.get("test_3")) ? "" : map.get("test_3") + "\t");
-			System.out.print(StringUtils.isBlank(map.get("test_4")) ? "" : map.get("test_4") + "\t");
+			System.out.print(MapUtils.getString(map, "test_0", "") + "\t");
+			System.out.print(MapUtils.getString(map, "test_1", "") + "\t");
+			System.out.print(MapUtils.getString(map, "test_2", "") + "\t");
+			System.out.print(MapUtils.getString(map, "test_3", "") + "\t");
+			System.out.print(MapUtils.getString(map, "test_4", "") + "\t");
+			System.out.print(MapUtils.getString(map, "test_5", "") + "\t");
+			System.out.print(MapUtils.getString(map, "test_6", "") + "\t");
 			System.out.println();
 		}
 	}

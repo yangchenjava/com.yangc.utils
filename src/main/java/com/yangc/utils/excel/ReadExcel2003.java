@@ -74,7 +74,7 @@ public class ReadExcel2003 {
 				NumberRecord numberRecord = (NumberRecord) record;
 				String value = null;
 				if (HSSFDateUtil.isInternalDateFormat(numberRecord.getXFIndex())) {
-					value = DateFormatUtils.format((long) numberRecord.getValue(), "yyyy-MM-dd");
+					value = DateFormatUtils.format(HSSFDateUtil.getJavaDate(numberRecord.getValue()), "yyyy-MM-dd");
 				} else {
 					double cellValue = numberRecord.getValue();
 					if (cellValue == (long) cellValue) {
