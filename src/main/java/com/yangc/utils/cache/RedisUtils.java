@@ -51,12 +51,31 @@ public class RedisUtils {
 		}
 	}
 
-	private static List<String> servers;
+	private static final List<String> SERVERS = new ArrayList<String>();
 	private static final Map<String, String> SERVER_CONFIG = new HashMap<String, String>();
 
 	private static ShardedJedisPool pool;
+	private static final List<SentinelListener> SENTINEL_LISTENERS = new ArrayList<SentinelListener>();
 
 	private static RedisUtils instance;
+
+	public interface SentinelListener {
+		public void onSentinelListener();
+	}
+
+	private RedisUtils() {
+		logger.info("=================== 初始化配置文件 ===================");
+		initConfig();
+		logger.info("=================== 初始化 redis ===================");
+		initRedis();
+	}
+
+	public synchronized static RedisUtils getInstance() {
+		if (instance == null) {
+			instance = new RedisUtils();
+		}
+		return instance;
+	}
 
 	/**
 	 * @功能: 初始化配置文件
@@ -67,18 +86,17 @@ public class RedisUtils {
 		String cluster = PropertiesUtils.getProperty(FILE_PATH, "redis.cluster");
 		// 只采用分片式一致性hash
 		if (StringUtils.equals(cluster, Cluster.SHARD.value())) {
-			servers = Arrays.asList(PropertiesUtils.getProperty(FILE_PATH, "redis.servers").split(","));
+			SERVERS.addAll(Arrays.asList(PropertiesUtils.getProperty(FILE_PATH, "redis.servers").split(",")));
 		}
 		// 分片式一致性hash + master-slave主从灾备, 通过sentinel自动切换主从结构
 		else {
-			servers = new ArrayList<String>();
 			String[] sentinels = PropertiesUtils.getProperty(FILE_PATH, "redis.sentinels").split(",");
 			for (String sentinel : sentinels) {
 				String[] hostPort = sentinel.split(":");
 				Jedis jedis = new Jedis(hostPort[0], Integer.parseInt(hostPort[1]));
 				for (Map<String, String> map : jedis.sentinelMasters()) {
 					String masterServer = map.get("ip") + ":" + map.get("port");
-					servers.add(masterServer);
+					SERVERS.add(masterServer);
 					// 启动线程用来查看主从结构并进行切换
 					new Thread(new CheckRedisSentinel(jedis, masterServer, map.get("name"), Long.parseLong(map.get("down-after-milliseconds")))).start();
 				}
@@ -107,8 +125,8 @@ public class RedisUtils {
 		poolConfig.setTestOnReturn(MapUtils.getBooleanValue(SERVER_CONFIG, "testOnReturn"));
 		poolConfig.setTestWhileIdle(MapUtils.getBooleanValue(SERVER_CONFIG, "testWhileIdle"));
 
-		List<JedisShardInfo> shards = new ArrayList<JedisShardInfo>(servers.size());
-		for (String server : servers) {
+		List<JedisShardInfo> shards = new ArrayList<JedisShardInfo>(SERVERS.size());
+		for (String server : SERVERS) {
 			String[] hostPort = server.split(":");
 			JedisShardInfo shard = new JedisShardInfo(hostPort[0], Integer.parseInt(hostPort[1]));
 			shards.add(shard);
@@ -146,35 +164,28 @@ public class RedisUtils {
 						pool.destroy();
 						logger.info("断开redis客户端");
 
-						servers.remove(this.masterServer);
+						SERVERS.remove(this.masterServer);
 						logger.info("移除服务端" + this.masterServer);
 
-						servers.add(newMasterServer);
+						SERVERS.add(newMasterServer);
 						this.masterServer = newMasterServer;
 						logger.info("添加服务端" + this.masterServer);
 
 						initRedis();
 						logger.info("开启redis客户端");
+
+						if (!SENTINEL_LISTENERS.isEmpty()) {
+							for (SentinelListener sentinelListener : SENTINEL_LISTENERS) {
+								sentinelListener.onSentinelListener();
+							}
+							logger.info("如果有订阅消息,通知重新订阅");
+						}
 					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	private RedisUtils() {
-		logger.info("=================== 初始化配置文件 ===================");
-		initConfig();
-		logger.info("=================== 初始化 redis ===================");
-		initRedis();
-	}
-
-	public synchronized static RedisUtils getInstance() {
-		if (instance == null) {
-			instance = new RedisUtils();
-		}
-		return instance;
 	}
 
 	/** ----------------------------------------- Server ------------------------------------------- */
@@ -731,11 +742,13 @@ public class RedisUtils {
 	 * @功能: 从指定通道订阅消息
 	 * @作者: yangc
 	 * @创建日期: 2014年12月25日 下午8:53:17
+	 * @param sentinelListener
 	 * @param jedisPubSub
 	 * @param channel
 	 * @return
 	 */
-	public boolean subscribe(JedisPubSub jedisPubSub, String channel) {
+	public boolean subscribe(SentinelListener sentinelListener, JedisPubSub jedisPubSub, String channel) {
+		SENTINEL_LISTENERS.add(sentinelListener);
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
@@ -757,7 +770,8 @@ public class RedisUtils {
 	 * @创建日期: 2014年12月25日 下午8:53:34
 	 * @param jedisPubSub
 	 */
-	public void unsubscribe(JedisPubSub jedisPubSub) {
+	public void unsubscribe(SentinelListener sentinelListener, JedisPubSub jedisPubSub) {
+		SENTINEL_LISTENERS.remove(sentinelListener);
 		jedisPubSub.unsubscribe();
 	}
 
