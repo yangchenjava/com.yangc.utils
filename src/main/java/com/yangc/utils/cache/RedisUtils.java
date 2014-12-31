@@ -55,13 +55,8 @@ public class RedisUtils {
 	private static final Map<String, String> SERVER_CONFIG = new HashMap<String, String>();
 
 	private static ShardedJedisPool pool;
-	private static final List<SentinelListener> SENTINEL_LISTENERS = new ArrayList<SentinelListener>();
 
 	private static RedisUtils instance;
-
-	public interface SentinelListener {
-		public void onSentinelListener();
-	}
 
 	private RedisUtils() {
 		logger.info("=================== 初始化配置文件 ===================");
@@ -173,13 +168,6 @@ public class RedisUtils {
 
 						initRedis();
 						logger.info("开启redis客户端");
-
-						if (!SENTINEL_LISTENERS.isEmpty()) {
-							for (SentinelListener sentinelListener : SENTINEL_LISTENERS) {
-								sentinelListener.onSentinelListener();
-							}
-							logger.info("如果有订阅消息,通知重新订阅");
-						}
 					}
 				}
 			} catch (Exception e) {
@@ -739,16 +727,14 @@ public class RedisUtils {
 	/** ----------------------------------------- Pub/Sub ------------------------------------------- */
 
 	/**
-	 * @功能: 从指定通道订阅消息
+	 * @功能: 从指定通道订阅消息(需要通过异步启动)
 	 * @作者: yangc
 	 * @创建日期: 2014年12月25日 下午8:53:17
-	 * @param sentinelListener
 	 * @param jedisPubSub
 	 * @param channel
 	 * @return
 	 */
-	public boolean subscribe(SentinelListener sentinelListener, JedisPubSub jedisPubSub, String channel) {
-		SENTINEL_LISTENERS.add(sentinelListener);
+	public boolean subscribe(JedisPubSub jedisPubSub, String channel) {
 		ShardedJedis jedis = null;
 		try {
 			jedis = pool.getResource();
@@ -770,8 +756,7 @@ public class RedisUtils {
 	 * @创建日期: 2014年12月25日 下午8:53:34
 	 * @param jedisPubSub
 	 */
-	public void unsubscribe(SentinelListener sentinelListener, JedisPubSub jedisPubSub) {
-		SENTINEL_LISTENERS.remove(sentinelListener);
+	public void unsubscribe(JedisPubSub jedisPubSub) {
 		jedisPubSub.unsubscribe();
 	}
 
