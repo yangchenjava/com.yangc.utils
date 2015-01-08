@@ -60,7 +60,7 @@ public class AesUtils {
 	}
 
 	/**
-	 * 生一个长度为len 的随机数
+	 * 生一个长度为len的随机数
 	 * @param int len 生成的随机密码的长度
 	 * @return String pwd 返回生成的随机密码
 	 */
