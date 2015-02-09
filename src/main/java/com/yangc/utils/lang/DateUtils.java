@@ -1,13 +1,9 @@
 package com.yangc.utils.lang;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
-
-	private static final long MINUTE_IN_MILLIS = 60L * 1000L;
-	private static final long HOUR_IN_MILLIS = 60L * 60L * 1000L;
 
 	private DateUtils() {
 	}
@@ -18,17 +14,23 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	 * @创建日期: 2015年1月30日 上午1:10:39
 	 */
 	public static String getDuration(long millis) {
-		Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(millis);
-		String pattern = "";
-		if (millis < MINUTE_IN_MILLIS) {
-			pattern = "ss秒";
-		} else if (millis < HOUR_IN_MILLIS) {
-			pattern = "mm分ss秒";
-		} else {
-			pattern = "HH小时mm分ss秒";
+		final long hourInMillis = 60 * 60 * 1000;
+		final long minuteInMillis = 60 * 1000;
+		final long secondInMillis = 1000;
+
+		StringBuilder sb = new StringBuilder();
+		if (millis > hourInMillis) {
+			sb.append(millis / hourInMillis).append("小时");
+			millis = millis % hourInMillis;
 		}
-		return new SimpleDateFormat(pattern).format(c.getTime());
+		if (millis > minuteInMillis) {
+			sb.append(millis / minuteInMillis).append("分");
+			millis = millis % minuteInMillis;
+		}
+		if (millis > secondInMillis) {
+			sb.append(millis / secondInMillis).append("秒");
+		}
+		return sb.toString();
 	}
 
 	/**
