@@ -298,8 +298,8 @@ public class JdbcUtils {
 			sb.append(" WHERE ROWNUM <= ").append(firstResult + maxResults).append(")");
 			sb.append(" WHERE ROWNUM_ > ").append(firstResult);
 		} else if (DB_NAME.equals("mysql")) {
-			sb.append("select * from (").append(sql).append(") temp_table_");
-			sb.append(" limit ").append(firstResult).append(",").append(maxResults);
+			sb.append("SELECT * FROM (").append(sql).append(") TEMP_TABLE_");
+			sb.append(" LIMIT ").append(firstResult).append(",").append(maxResults);
 		}
 		return this.findAll(conn, sb.toString(), obj);
 	}
