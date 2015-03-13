@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 import oracle.jdbc.OracleTypes;
 
-import com.yangc.utils.jdbc.JdbcUtils;
+import com.yangc.utils.db.JdbcUtils;
 import com.yangc.utils.prop.PropertiesUtils;
 
 @SuppressWarnings("unchecked")
