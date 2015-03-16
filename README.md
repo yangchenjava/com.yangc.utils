@@ -2,13 +2,17 @@ com.yangc.utils
 ===============
 
 ### java工具类
-作为程序猿一枚，热爱开源，这里是自己在工作中积累的工具类，均可用，若发现bug，请联系QQ：511636835，感激不尽。
+作为程序猿一枚，热爱开源，这里是自己在工作中积累的工具类，jdk6环境下均可用，若发现bug，请联系QQ：511636835，感激不尽。
 
 ### cache
 EhCacheUtils - 基于ehcache的工具类<br />
 LruCacheUtils - 基于LinkedHashMap实现LRU缓存的工具类<br />
 MemcachedUtils - 基于memcached的工具类<br />
 RedisUtils - 基于redis的工具类，与redis的集群配置无缝结合
+
+### db
+JdbcUtils - 操作jdbc的工具类<br />
+MongodbUtils - 操作mongodb的工具类
 
 ### email
 EmailUtils - 邮件工具类，支持发送带附件的邮件
@@ -32,9 +36,6 @@ QRCodeUtils - 生成二维码、解析二维码
 SerializeUtils - 序列化、反序列化对象<br />
 ZipUtils - 压缩、解压文件
 
-### jdbc
-JdbcUtils - 基于jdbc的工具类
-
 ### json
 JsonUtils - json格式转换
 
@@ -53,7 +54,9 @@ PinyinUtils - 汉字转拼音
 MediaUtils - 基于ffmpeg，qtfaststart，yamdi的多媒体工具类
 
 ### net
-FtpUtils - 操作FTP的工具类<br />
+AttachmentUtils - HTTP文件下载防止中文乱码<br />
+FastDFSUtils - 操作FastDFS的工具类<br />
+FtpUtils - 操作FTP的工具类（基于sun自家的包，jdk7以后不建议使用）<br />
 FtpUtilsApache - 基于apache操作FTP的工具类<br />
 HttpUtils - 发送HTTP请求<br />
 IpUtils - 获取IP<br />
