@@ -20,23 +20,21 @@ public class PinyinUtils {
 	 */
 	public static String getPinyin(String chinese) {
 		String pinyin = "";
-		if (StringUtils.isNotEmpty(chinese)) {
+		if (StringUtils.isNotBlank(chinese)) {
 			char[] nameChar = chinese.toCharArray();
 			HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();
 			defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
 			defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
-			for (int i = 0; i < nameChar.length; i++) {
-				if (nameChar[i] > 128) {
-					try {
+			try {
+				for (int i = 0; i < nameChar.length; i++) {
+					if (nameChar[i] > 128) {
 						pinyin += PinyinHelper.toHanyuPinyinStringArray(nameChar[i], defaultFormat)[0];
-					} catch (BadHanyuPinyinOutputFormatCombination e) {
-						e.printStackTrace();
-					} catch (RuntimeException e) {
-
+					} else {
+						pinyin += nameChar[i];
 					}
-				} else {
-					pinyin += nameChar[i];
 				}
+			} catch (BadHanyuPinyinOutputFormatCombination e) {
+				e.printStackTrace();
 			}
 		}
 		return pinyin;
@@ -49,23 +47,21 @@ public class PinyinUtils {
 	 */
 	public static String getPinyinHead(String chinese) {
 		String pinyin = "";
-		if (StringUtils.isNotEmpty(chinese)) {
+		if (StringUtils.isNotBlank(chinese)) {
 			char[] nameChar = chinese.toCharArray();
 			HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();
 			defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
 			defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
-			for (int i = 0; i < nameChar.length; i++) {
-				if (nameChar[i] > 128) {
-					try {
+			try {
+				for (int i = 0; i < nameChar.length; i++) {
+					if (nameChar[i] > 128) {
 						pinyin += PinyinHelper.toHanyuPinyinStringArray(nameChar[i], defaultFormat)[0].charAt(0);
-					} catch (BadHanyuPinyinOutputFormatCombination e) {
-						e.printStackTrace();
-					} catch (RuntimeException e) {
-
+					} else {
+						pinyin += nameChar[i];
 					}
-				} else {
-					pinyin += nameChar[i];
 				}
+			} catch (BadHanyuPinyinOutputFormatCombination e) {
+				e.printStackTrace();
 			}
 		}
 		return pinyin;
