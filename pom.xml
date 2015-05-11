@@ -30,18 +30,17 @@
 
 	<repositories>
 		<repository>
-			<id>mvnrepository</id>
-			<url>http://mvnrepository.com/</url>
-		</repository>
-		<repository>
 			<id>central</id>
-			<name>Maven Central</name>
-			<url>http://search.maven.org/</url>
+			<url>http://central.maven.org/maven2/</url>
 			<!-- <url>http://127.0.0.1:8081/nexus/content/repositories/central/</url> -->
 		</repository>
 		<repository>
 			<id>sonatype</id>
 			<url>http://repository.sonatype.org/content/groups/public/</url>
+		</repository>
+		<repository>
+			<id>atlassian</id>
+			<url>https://m2proxy.atlassian.com/repository/public</url>
 		</repository>
 	</repositories>
 
