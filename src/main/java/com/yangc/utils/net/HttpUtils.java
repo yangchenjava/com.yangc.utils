@@ -184,6 +184,11 @@ public class HttpUtils {
 			uri += "?" + params;
 		}
 
+		// 池连接
+		// HttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+		// CloseableHttpClient closeableHttpClient = HttpClients.custom().setConnectionManager(cm).build();
+		// cm.shutdown();
+
 		CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
 		HttpGet httpGet = new HttpGet(uri);
 		httpGet.setConfig(RequestConfig.custom().setConnectionRequestTimeout(TIMEOUT).setConnectTimeout(TIMEOUT).build());
