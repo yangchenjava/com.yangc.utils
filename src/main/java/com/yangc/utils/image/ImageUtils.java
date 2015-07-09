@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -19,10 +18,8 @@ import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.Thumbnails.Builder;
 import net.coobird.thumbnailator.geometry.Position;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 public class ImageUtils {
 
@@ -34,8 +31,9 @@ public class ImageUtils {
 	 * @作者: yangc
 	 * @创建日期: 2014年5月27日 上午10:59:53
 	 */
-	public static boolean zipImage(String srcImagePath, String zipImagePath, int zipImageWidth) {
-		FileOutputStream fos = null;
+	public static boolean zipImage(String srcImagePath, String destImagePath, int zipImageWidth) {
+		String imageType = FilenameUtils.getExtension(srcImagePath);
+
 		try {
 			Image image = ImageIO.read(new File(srcImagePath));
 			int width = image.getWidth(null);
@@ -46,21 +44,9 @@ public class ImageUtils {
 			boolean result = g.drawImage(image, 0, 0, zipImageWidth, zipImageHeight, null);
 			g.dispose();
 
-			fos = new FileOutputStream(zipImagePath);
-			JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(fos);
-			encoder.encode(bi);
-			fos.flush();
-			fos.close();
-			fos = null;
-			return result;
+			return result && ImageIO.write(bi, imageType, new File(destImagePath));
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				if (fos != null) fos.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 		return false;
 	}
@@ -77,7 +63,7 @@ public class ImageUtils {
 	 * @param cutImageHeight
 	 */
 	public static boolean screenshot(String srcImagePath, String destImagePath, int x, int y, int cutImageWidth, int cutImageHeight) {
-		String imageType = srcImagePath.substring(srcImagePath.lastIndexOf(".") + 1);
+		String imageType = FilenameUtils.getExtension(srcImagePath);
 
 		FileInputStream fis = null;
 		ImageInputStream iis = null;
