@@ -56,7 +56,9 @@ public class RedisUtils {
 
 	private static ShardedJedisPool pool;
 
-	private static RedisUtils instance;
+	private static class InstanceHolder {
+		private static final RedisUtils instance = new RedisUtils();
+	}
 
 	private RedisUtils() {
 		logger.info("=================== 初始化配置文件 ===================");
@@ -65,11 +67,8 @@ public class RedisUtils {
 		initRedis();
 	}
 
-	public synchronized static RedisUtils getInstance() {
-		if (instance == null) {
-			instance = new RedisUtils();
-		}
-		return instance;
+	public static RedisUtils getInstance() {
+		return InstanceHolder.instance;
 	}
 
 	/**
