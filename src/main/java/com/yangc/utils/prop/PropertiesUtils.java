@@ -21,7 +21,7 @@ public class PropertiesUtils {
 	}
 
 	/**
-	 * @功能: 根据name获取properties文件中的value (注意: 虽然静态方法中调用了静态变量, 使得该方法非线程安全, 但该方法只是读取配置文件, 不做修改, 所以不会有问题)
+	 * @功能: 根据name获取properties文件中的value (注意: 虽然静态方法中调用了静态变量, 使得该方法非线程安全, 但该方法只是读取或设置配置文件, 不做删除, 所以不会有问题)
 	 * @作者: yangc
 	 * @创建日期: 2013-11-21 下午07:01:48
 	 * @param filePath properties文件路径(classpath中的相对路径)
@@ -49,7 +49,7 @@ public class PropertiesUtils {
 	}
 
 	/**
-	 * @功能: 根据name获取properties文件中的value, 如果为空返回默认值 (注意: 虽然静态方法中调用了静态变量, 使得该方法非线程安全, 但该方法只是读取配置文件, 不做修改, 所以不会有问题)
+	 * @功能: 根据name获取properties文件中的value, 如果为空返回默认值 (注意: 虽然静态方法中调用了静态变量, 使得该方法非线程安全, 但该方法只是读取或设置配置文件, 不做删除, 所以不会有问题)
 	 * @作者: yangc
 	 * @创建日期: 2013-11-21 下午07:01:48
 	 * @param filePath properties文件路径(classpath中的相对路径)
@@ -79,7 +79,7 @@ public class PropertiesUtils {
 	}
 
 	/**
-	 * @功能: properties文件中的name,value (已过期, 会打乱properties文件中顺序, 虽然静态方法中调用了静态变量, 使得该方法非线程安全, 但是已加锁, 效率低, 不推荐使用)
+	 * @功能: properties文件中的name,value (已过期, 会打乱properties文件中顺序, 其中加锁是为了防止多个线程同时写文件)
 	 * @作者: yangc
 	 * @创建日期: 2013-11-21 下午07:02:38
 	 * @param filePath properties文件路径(classpath中的相对路径)
