@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.zxing.BarcodeFormat;
@@ -67,7 +68,7 @@ public class QRCodeUtils {
 	 * @return
 	 */
 	public static boolean encode(String content, int width, int height, String imagePath, String logoPath) {
-		String imageType = imagePath.substring(imagePath.lastIndexOf(".") + 1);
+		String imageType = FilenameUtils.getExtension(imagePath);
 		if (!StringUtils.equals(imageType, "png")) {
 			throw new IllegalArgumentException("image must be png");
 		}

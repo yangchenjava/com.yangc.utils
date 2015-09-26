@@ -29,6 +29,9 @@ public class IpUtils {
 		if (StringUtils.isBlank(ip) || ip.equalsIgnoreCase("unknown")) {
 			ip = request.getRemoteAddr();
 		}
+		if (StringUtils.equals(ip, "0:0:0:0:0:0:0:1")) {
+			ip = "127.0.0.1";
+		}
 		return ip;
 	}
 
