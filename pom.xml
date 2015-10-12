@@ -35,12 +35,12 @@
 			<!-- <url>http://127.0.0.1:8081/nexus/content/repositories/central/</url> -->
 		</repository>
 		<repository>
-			<id>sonatype</id>
-			<url>http://repository.sonatype.org/content/groups/public/</url>
+			<id>repo1</id>
+			<url>http://repo1.maven.org/maven2</url>
 		</repository>
 		<repository>
-			<id>atlassian</id>
-			<url>https://m2proxy.atlassian.com/repository/public</url>
+			<id>sonatype</id>
+			<url>http://repository.sonatype.org/content/groups/public/</url>
 		</repository>
 	</repositories>
 
