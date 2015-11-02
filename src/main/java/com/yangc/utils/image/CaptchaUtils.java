@@ -46,7 +46,8 @@ public class CaptchaUtils {
 		ServletOutputStream sos = null;
 		try {
 			response.addIntHeader("Expires", 0);
-			response.addHeader("Cache-Control", "no-cache");
+			response.addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+			response.addHeader("Cache-Control", "post-check=0, pre-check=0");
 			response.addHeader("Pragma", "no-cache");
 			response.setContentType("image/jpeg");
 			sos = response.getOutputStream();

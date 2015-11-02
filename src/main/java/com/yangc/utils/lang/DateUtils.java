@@ -14,9 +14,9 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	 * @创建日期: 2015年1月30日 上午1:10:39
 	 */
 	public static String getDuration(long millis) {
-		final long hourInMillis = 60 * 60 * 1000;
-		final long minuteInMillis = 60 * 1000;
-		final long secondInMillis = 1000;
+		final long hourInMillis = 60L * 60L * 1000L;
+		final long minuteInMillis = 60L * 1000L;
+		final long secondInMillis = 1000L;
 
 		StringBuilder sb = new StringBuilder();
 		if (millis > hourInMillis) {
