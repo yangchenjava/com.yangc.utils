@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.net.telnet.TelnetClient;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whalin.MemCached.MemCachedClient;
 import com.whalin.MemCached.SockIOPool;
@@ -15,7 +16,7 @@ import com.yangc.utils.prop.PropertiesUtils;
 
 public class MemcachedUtils {
 
-	private static final Logger logger = Logger.getLogger(MemcachedUtils.class);
+	private static final Logger logger = LogManager.getLogger(MemcachedUtils.class);
 
 	private static final String FILE_PATH = "/memcached.properties";
 

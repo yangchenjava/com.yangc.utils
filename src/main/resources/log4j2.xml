@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="[YANGC] %d [%t] %p [%c] - %m%n" />
+		</Console>
+		<File name="File" fileName="${sys:catalina.home}/logs/yangc_error.log" append="true">
+			<PatternLayout pattern="[YANGC] %d [%t] %p [%c] - %m%n" />
+		</File>
+		<RollingFile name="RollingFile" fileName="${sys:catalina.home}/logs/yangc.log" filePattern="${sys:catalina.home}/logs/yangc-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="[YANGC] %d [%t] %p [%c] - %m%n" />
+			<SizeBasedTriggeringPolicy size="10 MB" />
+		</RollingFile>
+	</appenders>
+	<Loggers>
+		<Logger name="com.yangc" level="info" additivity="false">
+			<appender-ref ref="Console" />
+			<appender-ref ref="RollingFile" />
+		</Logger>
+		<Root level="error">
+			<appender-ref ref="File" />
+		</Root>
+	</Loggers>
+</configuration>
