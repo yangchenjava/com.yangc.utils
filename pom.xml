@@ -10,7 +10,7 @@
 		<project.build.name>com.yangc.utils</project.build.name>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-		<log4j2.version>2.2</log4j2.version>
+		<log4j2.version>2.3</log4j2.version>
 		<poi.version>3.10-FINAL</poi.version>
 	</properties>
 
