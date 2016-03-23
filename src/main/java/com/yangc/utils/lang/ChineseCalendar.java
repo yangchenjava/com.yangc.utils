@@ -708,7 +708,7 @@ public final class ChineseCalendar extends GregorianCalendar {
 	private static final String[] chineseMonthNames = { "", "正", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二" };
 	private static final String[] chineseDateNames = { "", "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十", "廿一", "廿二", "廿三",
 			"廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十" };
-	private static final String[] principleTermNames = { "大寒", "雨水", "春分", "谷雨", "夏满", "夏至", "大暑", "处暑", "秋分", "霜降", "小雪", "冬至" };
+	private static final String[] principleTermNames = { "大寒", "雨水", "春分", "谷雨", "小满", "夏至", "大暑", "处暑", "秋分", "霜降", "小雪", "冬至" };
 	private static final String[] sectionalTermNames = { "小寒", "立春", "惊蛰", "清明", "立夏", "芒种", "小暑", "立秋", "白露", "寒露", "立冬", "大雪" };
 	private static final String[] stemNames = { "", "甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸" };
 	private static final String[] branchNames = { "", "子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥" };

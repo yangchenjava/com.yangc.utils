@@ -21,7 +21,7 @@ public class Md5Utils {
 	/**
 	 * 默认的密码字符串组合，apache校验下载的文件的正确性用的就是默认的这个组合
 	 */
-	private static final char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+	private static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
 	private Md5Utils() {
 	}
@@ -121,8 +121,8 @@ public class Md5Utils {
 	}
 
 	private static void appendHexPair(byte b, StringBuilder sb) {
-		char c0 = hexDigits[(b & 0xf0) >> 4];
-		char c1 = hexDigits[b & 0xf];
+		char c0 = HEX_DIGITS[(b & 0xf0) >> 4];
+		char c1 = HEX_DIGITS[b & 0xf];
 		sb.append(c0).append(c1);
 	}
 
