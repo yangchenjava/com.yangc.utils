@@ -14,6 +14,14 @@ public class AttachmentUtils {
 	private AttachmentUtils() {
 	}
 
+	/**
+	 * @功能: 根据不同浏览器防止下载的附件名称乱码
+	 * @作者: yangc
+	 * @创建日期: 2016年4月26日 上午10:13:15
+	 * @param request
+	 * @param response
+	 * @param fileName
+	 */
 	public static void convertAttachmentFileName(HttpServletRequest request, HttpServletResponse response, String fileName) {
 		if (StringUtils.isNotBlank(fileName)) {
 			try {

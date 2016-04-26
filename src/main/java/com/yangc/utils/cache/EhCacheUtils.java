@@ -11,17 +11,16 @@ public class EhCacheUtils {
 
 	private static CacheManager cacheManager;
 
-	private static EhCacheUtils ehCacheUtils;
+	private static class InstanceHolder {
+		private static final EhCacheUtils instance = new EhCacheUtils();
+	}
 
 	private EhCacheUtils() {
 		cacheManager = new CacheManager(EhCacheUtils.class.getResourceAsStream(FILE_PATH));
 	}
 
-	public synchronized static EhCacheUtils getInstance() {
-		if (ehCacheUtils == null) {
-			ehCacheUtils = new EhCacheUtils();
-		}
-		return ehCacheUtils;
+	public static EhCacheUtils getInstance() {
+		return InstanceHolder.instance;
 	}
 
 	public boolean put(String cacheName, Object key, Object value) {
@@ -103,7 +102,6 @@ public class EhCacheUtils {
 	public void shutdown() {
 		cacheManager.shutdown();
 		cacheManager = null;
-		ehCacheUtils = null;
 	}
 
 }

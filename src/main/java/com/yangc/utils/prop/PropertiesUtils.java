@@ -5,9 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,13 +15,13 @@ public class PropertiesUtils {
 
 	private static final String UTF_8 = "UTF-8";
 
-	private static final Map<String, Properties> PROPS = new HashMap<String, Properties>();
+	private static final ConcurrentMap<String, Properties> PROPS = new ConcurrentHashMap<String, Properties>();
 
 	private PropertiesUtils() {
 	}
 
 	/**
-	 * @功能: 根据name获取properties文件中的value (注意: 虽然静态方法中调用了静态变量, 使得该方法非线程安全, 但该方法只是读取或设置配置文件, 不做删除, 所以不会有问题)
+	 * @功能: 根据name获取properties文件中的value
 	 * @作者: yangc
 	 * @创建日期: 2013-11-21 下午07:01:48
 	 * @param filePath properties文件路径(classpath中的相对路径)
@@ -49,7 +49,7 @@ public class PropertiesUtils {
 	}
 
 	/**
-	 * @功能: 根据name获取properties文件中的value, 如果为空返回默认值 (注意: 虽然静态方法中调用了静态变量, 使得该方法非线程安全, 但该方法只是读取或设置配置文件, 不做删除, 所以不会有问题)
+	 * @功能: 根据name获取properties文件中的value, 如果为空返回默认值
 	 * @作者: yangc
 	 * @创建日期: 2013-11-21 下午07:01:48
 	 * @param filePath properties文件路径(classpath中的相对路径)

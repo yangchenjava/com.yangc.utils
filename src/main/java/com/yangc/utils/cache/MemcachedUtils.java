@@ -29,7 +29,20 @@ public class MemcachedUtils {
 
 	private static final MemCachedClient client = new MemCachedClient();
 
-	private static MemcachedUtils memcachedUtils;
+	private static class InstanceHolder {
+		private static MemcachedUtils instance = new MemcachedUtils();
+	}
+
+	private MemcachedUtils() {
+		logger.info("=================== 初始化配置文件 ===================");
+		initConfig();
+		logger.info("=================== 初始化 memcached ===============");
+		initMemcached();
+	}
+
+	public static MemcachedUtils getInstance() {
+		return InstanceHolder.instance;
+	}
 
 	/**
 	 * @功能: 初始化参数配置
@@ -101,20 +114,6 @@ public class MemcachedUtils {
 		pool.setSocketTO(Integer.parseInt(serverConfig.get("socketTO")));
 
 		pool.initialize();
-	}
-
-	private MemcachedUtils() {
-		logger.info("=================== 初始化配置文件 ===================");
-		initConfig();
-		logger.info("=================== 初始化 memcached ===============");
-		initMemcached();
-	}
-
-	public synchronized static MemcachedUtils getInstance() {
-		if (memcachedUtils == null) {
-			memcachedUtils = new MemcachedUtils();
-		}
-		return memcachedUtils;
 	}
 
 	/**
