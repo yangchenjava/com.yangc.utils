@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.net.telnet.TelnetClient;
 import org.apache.logging.log4j.LogManager;
@@ -25,12 +26,12 @@ public class MemcachedUtils {
 	private static final Map<String, String> serverConfig = new HashMap<String, String>();
 
 	// 是否启用memcached
-	private static boolean isUsed = true;
+	private static final AtomicBoolean isUsed = new AtomicBoolean();
 
-	private static final MemCachedClient client = new MemCachedClient();
+	private static SockIOPool pool;
 
 	private static class InstanceHolder {
-		private static MemcachedUtils instance = new MemcachedUtils();
+		private static final MemcachedUtils instance = new MemcachedUtils();
 	}
 
 	private MemcachedUtils() {
@@ -66,7 +67,7 @@ public class MemcachedUtils {
 		}
 		int serverCount = serverUsed.size();
 		if (serverCount == 0) {
-			isUsed = false;
+			isUsed.set(false);
 			return;
 		}
 
@@ -87,7 +88,12 @@ public class MemcachedUtils {
 	}
 
 	private void initMemcached() {
-		SockIOPool pool = SockIOPool.getInstance();
+		if (!isUsed.get()) {
+			logger.error("=================== 初始化 memcached 失败 ===============");
+			return;
+		}
+
+		pool = SockIOPool.getInstance();
 
 		// 服务器地址
 		pool.setServers(servers);
@@ -117,13 +123,41 @@ public class MemcachedUtils {
 	}
 
 	/**
+	 * @功能: 重新加载memcached客户端
+	 * @作者: yangc
+	 * @创建日期: 2016年4月27日 下午5:11:58
+	 * @return
+	 */
+	public synchronized boolean reloadMemcached() {
+		if (pool != null) {
+			pool.shutDown();
+			pool = null;
+		}
+		logger.info("=================== 初始化配置文件 ===================");
+		initConfig();
+		logger.info("=================== 初始化 memcached ===============");
+		initMemcached();
+		return isUsed.get();
+	}
+
+	/**
+	 * @功能: 获取memcached客户端
+	 * @作者: yangc
+	 * @创建日期: 2016年4月27日 下午5:10:40
+	 * @return
+	 */
+	public MemCachedClient getMemCachedClient() {
+		return new MemCachedClient();
+	}
+
+	/**
 	 * @功能: 是否启用memcached
 	 * @作者: yangc
 	 * @创建日期: 2014年3月29日 下午10:47:28
 	 * @return
 	 */
 	public boolean isUsedMemcached() {
-		return isUsed;
+		return isUsed.get();
 	}
 
 	/**
@@ -135,8 +169,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public boolean add(String key, Object value) {
-		if (isUsed) {
-			return client.add(key, value);
+		if (this.isUsedMemcached()) {
+			return this.getMemCachedClient().add(key, value);
 		}
 		return false;
 	}
@@ -151,8 +185,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public boolean add(String key, Object value, Date date) {
-		if (isUsed) {
-			return client.add(key, value, date);
+		if (this.isUsedMemcached()) {
+			return this.getMemCachedClient().add(key, value, date);
 		}
 		return false;
 	}
@@ -166,8 +200,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public boolean set(String key, Object value) {
-		if (isUsed) {
-			return client.set(key, value);
+		if (this.isUsedMemcached()) {
+			return this.getMemCachedClient().set(key, value);
 		}
 		return false;
 	}
@@ -182,8 +216,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public boolean set(String key, Object value, Date date) {
-		if (isUsed) {
-			return client.set(key, value, date);
+		if (this.isUsedMemcached()) {
+			return this.getMemCachedClient().set(key, value, date);
 		}
 		return false;
 	}
@@ -197,8 +231,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public boolean replace(String key, Object value) {
-		if (isUsed) {
-			return client.replace(key, value);
+		if (this.isUsedMemcached()) {
+			return this.getMemCachedClient().replace(key, value);
 		}
 		return false;
 	}
@@ -213,8 +247,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public boolean replace(String key, Object value, Date date) {
-		if (isUsed) {
-			return client.replace(key, value, date);
+		if (this.isUsedMemcached()) {
+			return this.getMemCachedClient().replace(key, value, date);
 		}
 		return false;
 	}
@@ -228,8 +262,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public <T> T get(String key, Class<T> clazz) {
-		if (isUsed) {
-			return clazz.cast(client.get(key));
+		if (this.isUsedMemcached()) {
+			return clazz.cast(this.getMemCachedClient().get(key));
 		}
 		return null;
 	}
@@ -242,8 +276,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public Map<String, Object> get(String[] keys) {
-		if (isUsed) {
-			return client.getMulti(keys);
+		if (this.isUsedMemcached()) {
+			return this.getMemCachedClient().getMulti(keys);
 		}
 		return null;
 	}
@@ -256,8 +290,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public boolean delete(String key) {
-		if (isUsed) {
-			return client.delete(key);
+		if (this.isUsedMemcached()) {
+			return this.getMemCachedClient().delete(key);
 		}
 		return false;
 	}
@@ -269,8 +303,8 @@ public class MemcachedUtils {
 	 * @return
 	 */
 	public boolean flushAll() {
-		if (isUsed) {
-			return client.flushAll();
+		if (this.isUsedMemcached()) {
+			return this.getMemCachedClient().flushAll();
 		}
 		return false;
 	}

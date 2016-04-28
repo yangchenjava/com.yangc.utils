@@ -8,6 +8,7 @@ com.yangc.utils
 EhCacheUtils - 基于ehcache的工具类<br />
 LruCacheUtils - 基于LinkedHashMap实现LRU缓存的工具类<br />
 MemcachedUtils - 基于memcached的工具类<br />
+XMemcachedUtils - 基于memcached的工具类（使用XMemcached客户端）<br />
 RedisUtils - 基于redis的工具类，与redis的集群配置无缝结合
 
 ### db
@@ -40,6 +41,7 @@ ZipUtils - 压缩、解压文件
 JsonUtils - json格式转换
 
 ### lang
+BeanUtils - map与object互相转换<br />
 CharsetDetectorUtils - 获取文本文件编码格式<br />
 ChineseCalendar - 农历日历<br />
 ConvertUtils - 高低字节转换<br />
