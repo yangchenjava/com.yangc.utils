@@ -3,11 +3,11 @@ package com.yangc.utils.lang;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public class ConvertUtils {
+public class ConverterUtils {
 
 	private static final String HEX = "0123456789ABCDEF";
 
-	private ConvertUtils() {
+	private ConverterUtils() {
 	}
 
 	public static byte[] hexStringToByte(String value) {

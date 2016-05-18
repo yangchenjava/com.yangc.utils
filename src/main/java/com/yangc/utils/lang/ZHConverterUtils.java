@@ -11,49 +11,44 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-public class ZHConverter {
+public class ZHConverterUtils {
+
+	public enum ConverterType {
+		/** 繁体 */
+		TRADITIONAL,
+		/** 简体 */
+		SIMPLIFIED;
+	}
 
 	private Properties charMap = new Properties();
 	private Set<String> conflictingSets = new HashSet<String>();
 
-	/** 繁体 */
-	public static final int TRADITIONAL = 0;
-	/** 简体 */
-	public static final int SIMPLIFIED = 1;
-	private static final int NUM_OF_CONVERTERS = 2;
-	private static final ZHConverter[] converters = new ZHConverter[NUM_OF_CONVERTERS];
-	private static final String[] propertyFiles = new String[2];
+	private static final ZHConverterUtils[] converters = new ZHConverterUtils[ConverterType.values().length];
+	private static final String[] propertyFiles = new String[ConverterType.values().length];
 
 	static {
-		propertyFiles[TRADITIONAL] = "/zh2Hant.properties";
-		propertyFiles[SIMPLIFIED] = "/zh2Hans.properties";
+		propertyFiles[ConverterType.TRADITIONAL.ordinal()] = "/zh2Hant.properties";
+		propertyFiles[ConverterType.SIMPLIFIED.ordinal()] = "/zh2Hans.properties";
 	}
 
-	/**
-	 * @param converterType 0 for traditional and 1 for simplified
-	 * @return
-	 */
-	public static ZHConverter getInstance(int converterType) {
-		if (converterType >= 0 && converterType < NUM_OF_CONVERTERS) {
-			if (converters[converterType] == null) {
-				synchronized (ZHConverter.class) {
-					if (converters[converterType] == null) {
-						converters[converterType] = new ZHConverter(propertyFiles[converterType]);
-					}
+	public static ZHConverterUtils getInstance(ZHConverterUtils.ConverterType converterType) {
+		int i = converterType.ordinal();
+		if (converters[i] == null) {
+			synchronized (ZHConverterUtils.class) {
+				if (converters[i] == null) {
+					converters[i] = new ZHConverterUtils(propertyFiles[i]);
 				}
 			}
-			return converters[converterType];
-		} else {
-			return null;
 		}
+		return converters[i];
 	}
 
-	public static String convert(String text, int converterType) {
-		ZHConverter instance = getInstance(converterType);
+	public static String convert(String text, ZHConverterUtils.ConverterType converterType) {
+		ZHConverterUtils instance = getInstance(converterType);
 		return instance.convert(text);
 	}
 
-	private ZHConverter(String propertyFile) {
+	private ZHConverterUtils(String propertyFile) {
 		InputStream is = this.getClass().getResourceAsStream(propertyFile);
 		if (is != null) {
 			BufferedReader reader = null;

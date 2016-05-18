@@ -44,13 +44,15 @@ JsonUtils - json格式转换
 BeanUtils - map与object互相转换<br />
 CharsetDetectorUtils - 获取文本文件编码格式<br />
 ChineseCalendar - 农历日历<br />
-ConvertUtils - 高低字节转换<br />
+ConverterUtils - 高低字节转换<br />
 DateUtils - 日期工具类<br />
+GPSUtils - GPS工具类<br />
 HtmlFilterUtils - 过滤html标签<br />
 JsoupUtils - 基于jsoup过滤html标签<br />
 MoneyUtils - 获取大写金额<br />
 NumberUtils - 数字工具类<br />
-PinyinUtils - 汉字转拼音
+PinyinUtils - 汉字转拼音<br />
+ZHConverterUtils - 汉字繁简体转换
 
 ### media
 MediaUtils - 基于ffmpeg，qtfaststart，yamdi的多媒体工具类

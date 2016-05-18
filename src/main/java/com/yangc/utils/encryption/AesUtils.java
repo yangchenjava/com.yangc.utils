@@ -17,7 +17,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yangc.utils.lang.ConvertUtils;
+import com.yangc.utils.lang.ConverterUtils;
 
 public class AesUtils {
 
@@ -39,7 +39,7 @@ public class AesUtils {
 				Cipher cipher = Cipher.getInstance("AES");
 				cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
 				byte[] bytes = cipher.doFinal(str.getBytes(UTF_8));
-				return ConvertUtils.byteToHexString(bytes);
+				return ConverterUtils.byteToHexString(bytes);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -57,7 +57,7 @@ public class AesUtils {
 				SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
 				Cipher cipher = Cipher.getInstance("AES");
 				cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-				byte[] bytes = cipher.doFinal(ConvertUtils.hexStringToByte(str));
+				byte[] bytes = cipher.doFinal(ConverterUtils.hexStringToByte(str));
 				return new String(bytes);
 			} catch (Exception e) {
 				e.printStackTrace();
