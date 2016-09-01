@@ -1,11 +1,7 @@
 package com.yangc.utils.encryption;
 
-import java.io.IOException;
-
-import org.apache.commons.lang3.StringUtils;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
 
 public class Base64Utils {
 
@@ -13,38 +9,61 @@ public class Base64Utils {
 	}
 
 	/**
+	 * @功能: 将字节数组进行Base64编码
+	 * @作者: yangc
+	 * @创建日期: 2016年9月1日 下午2:56:56
+	 * @param data
+	 * @return
+	 */
+	public static String encode(byte[] data) {
+		return Base64.encodeBase64String(data);
+	}
+
+	/**
 	 * 将字符串进行Base64编码
-	 * @param str 字符串
+	 * @param data 字符串
 	 * @return 编码后的字符串
 	 */
-	public static String encode(String str) {
-		if (StringUtils.isNotEmpty(str)) {
-			BASE64Encoder encoder = new BASE64Encoder();
-			return encoder.encode(str.getBytes());
+	public static String encode(String data) {
+		if (data != null && data.length() > 0) {
+			// BASE64Encoder encoder = new BASE64Encoder();
+			// encoder.encode(data.getBytes());
+			return Base64.encodeBase64String(StringUtils.getBytesUtf8(data));
+		}
+		return null;
+	}
+
+	/**
+	 * @功能: 将数据进行Base64解码
+	 * @作者: yangc
+	 * @创建日期: 2016年9月1日 下午3:12:08
+	 * @param data
+	 * @return
+	 */
+	public static byte[] decode2Bytes(String data) {
+		if (data != null && data.length() > 0) {
+			return Base64.decodeBase64(data);
 		}
 		return null;
 	}
 
 	/**
 	 * 将数据进行Base64解码
-	 * @param str 字符串
+	 * @param data 字符串
 	 * @return 解码后的字符串
 	 */
-	public static String decode(String str) {
-		if (StringUtils.isNotEmpty(str)) {
-			BASE64Decoder decoder = new BASE64Decoder();
-			try {
-				return new String(decoder.decodeBuffer(str));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+	public static String decode2String(String data) {
+		if (data != null && data.length() > 0) {
+			// BASE64Decoder decoder = new BASE64Decoder();
+			// decoder.decodeBuffer(data);
+			return StringUtils.newStringUtf8(Base64.decodeBase64(data));
 		}
 		return null;
 	}
 
 	public static void main(String[] args) {
 		System.out.println(Base64Utils.encode("yangc"));
-		System.out.println(Base64Utils.decode("eWFuZ2M="));
+		System.out.println(Base64Utils.decode2String("eWFuZ2M="));
 	}
 
 }
