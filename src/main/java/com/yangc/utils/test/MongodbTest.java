@@ -1,19 +1,22 @@
 package com.yangc.utils.test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.conversions.Bson;
+
 import com.mongodb.MongoClient;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 import com.yangc.utils.db.MongodbUtils;
 
 public class MongodbTest {
 
 	public static void main(String[] args) {
 		MongodbUtils mongodbUtils = new MongodbUtils();
-		MongoClient mongoClient = mongodbUtils.connect("127.0.0.1", 27017);
+		MongoClient mongoClient = mongodbUtils.connect("192.168.7.8", 27017, "root", "root");
 		insert(mongodbUtils, mongoClient);
 		findAll(mongodbUtils, mongoClient);
 		getCount(mongodbUtils, mongoClient);
@@ -34,20 +37,19 @@ public class MongodbTest {
 		record_2.put("password", "222");
 		record_2.put("age", 38);
 		records.add(record_2);
+
+		LinkedHashMap<String, Object> record_3 = new LinkedHashMap<String, Object>();
+		record_3.put("username", "ccc");
+		record_3.put("password", "333");
+		record_3.put("age", 18);
+		records.add(record_3);
 		System.out.println("insert=" + mongodbUtils.insert(mongoClient, "blog", "T_SYS_TEST", records));
 	}
 
 	public static void findAll(MongodbUtils mongodbUtils, MongoClient mongoClient) {
-		Map<String, Object> conditions = new HashMap<String, Object>();
-		Map<String, Object> condition_1 = new HashMap<String, Object>();
-		condition_1.put("$gte", 25);
-		conditions.put("age", condition_1);
-
-		Map<String, Object> fields = new HashMap<String, Object>();
-		fields.put("_id", 0);
-		fields.put("username", 1);
-		fields.put("age", 1);
-		List<Map<String, Object>> mapList = mongodbUtils.findAll(mongoClient, "blog", "T_SYS_TEST", conditions, fields);
+		Bson filter = Filters.gte("age", 25);
+		Bson projection = Projections.fields(Projections.exclude("_id"), Projections.include("username", "age"));
+		List<Map<String, Object>> mapList = mongodbUtils.findAll(mongoClient, "blog", "T_SYS_TEST", filter, projection, null);
 		for (Map<String, Object> map : mapList) {
 			for (Map.Entry<String, Object> entry : map.entrySet()) {
 				System.out.println(entry.getKey() + " == " + entry.getValue());

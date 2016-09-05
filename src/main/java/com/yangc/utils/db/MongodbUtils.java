@@ -1,21 +1,22 @@
 package com.yangc.utils.db;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
 
 public class MongodbUtils {
 
@@ -27,14 +28,10 @@ public class MongodbUtils {
 	 * @param port
 	 * @return
 	 */
-	public MongoClient connect(String host, int port) {
-		MongoClient mongoClient = null;
-		try {
-			mongoClient = new MongoClient(new ServerAddress(host, port));
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-		return mongoClient;
+	public MongoClient connect(String host, int port, String username, String password) {
+		List<MongoCredential> credentialsList = new ArrayList<MongoCredential>();
+		credentialsList.add(MongoCredential.createCredential(username, "admin", password.toCharArray()));
+		return new MongoClient(new ServerAddress(host, port), credentialsList);
 	}
 
 	/**
@@ -44,20 +41,10 @@ public class MongodbUtils {
 	 * @param hosts
 	 * @return
 	 */
-	public MongoClient connect(Map<String, Integer> hosts) {
-		MongoClient mongoClient = null;
-		if (MapUtils.isNotEmpty(hosts)) {
-			try {
-				List<ServerAddress> seeds = new ArrayList<ServerAddress>();
-				for (Map.Entry<String, Integer> entry : hosts.entrySet()) {
-					seeds.add(new ServerAddress(entry.getKey(), entry.getValue()));
-				}
-				mongoClient = new MongoClient(seeds);
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			}
-		}
-		return mongoClient;
+	public MongoClient connect(List<ServerAddress> addrs, String username, String password) {
+		List<MongoCredential> credentialsList = new ArrayList<MongoCredential>();
+		credentialsList.add(MongoCredential.createCredential(username, "admin", password.toCharArray()));
+		return new MongoClient(addrs, credentialsList);
 	}
 
 	/**
@@ -83,15 +70,16 @@ public class MongodbUtils {
 	 * @return
 	 */
 	public boolean insert(MongoClient mongoClient, String databaseName, String collectionName, List<LinkedHashMap<String, Object>> records) {
-		DB db = mongoClient.getDB(databaseName);
-		DBCollection dbCollection = db.getCollection(collectionName);
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
 
 		if (CollectionUtils.isNotEmpty(records)) {
-			List<DBObject> list = new ArrayList<DBObject>(records.size());
+			List<Document> documents = new ArrayList<Document>(records.size());
 			for (LinkedHashMap<String, Object> record : records) {
-				list.add(new BasicDBObject(record));
+				Document document = new Document(record);
+				documents.add(document);
 			}
-			dbCollection.insert(list);
+			collection.insertMany(documents);
 			return true;
 		}
 		return false;
@@ -104,14 +92,13 @@ public class MongodbUtils {
 	 * @param mongoClient
 	 * @param databaseName 数据库名
 	 * @param collectionName 集合名(表)
-	 * @param conditions 条件
+	 * @param filter 条件
 	 * @return
 	 */
-	public boolean remove(MongoClient mongoClient, String databaseName, String collectionName, Map<String, Object> conditions) {
-		DB db = mongoClient.getDB(databaseName);
-		DBCollection dbCollection = db.getCollection(collectionName);
-
-		dbCollection.remove(MapUtils.isEmpty(conditions) ? new BasicDBObject() : new BasicDBObject(conditions));
+	public boolean remove(MongoClient mongoClient, String databaseName, String collectionName, Bson filter) {
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
+		collection.deleteMany(filter);
 		return true;
 	}
 
@@ -122,72 +109,71 @@ public class MongodbUtils {
 	 * @param mongoClient
 	 * @param databaseName 数据库名
 	 * @param collectionName 集合名(表)
-	 * @param conditions 条件
-	 * @param newValue 更新的新值
+	 * @param filter 条件
+	 * @param update 更新的新值
 	 * @param upsert true,如果查询不到记录,则插入修改的数据
-	 * @param multi 是否修改多条数据
 	 * @return
 	 */
-	public boolean update(MongoClient mongoClient, String databaseName, String collectionName, Map<String, Object> conditions, Map<String, Object> newValue, boolean upsert, boolean multi) {
-		DB db = mongoClient.getDB(databaseName);
-		DBCollection dbCollection = db.getCollection(collectionName);
-
-		if (MapUtils.isNotEmpty(newValue)) {
-			dbCollection.update(MapUtils.isEmpty(conditions) ? new BasicDBObject() : new BasicDBObject(conditions), new BasicDBObject(newValue), upsert, multi);
-			return true;
-		}
+	public boolean update(MongoClient mongoClient, String databaseName, String collectionName, Bson filter, Bson update, boolean upsert) {
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
+		collection.updateMany(filter, update, new UpdateOptions().upsert(upsert));
 		return false;
 	}
 
 	/**
-	 * @功能: 分页查询数据
+	 * @功能: 查询数据
 	 * @作者: yangc
 	 * @创建日期: 2015年3月14日 下午3:59:14
 	 * @param mongoClient
 	 * @param databaseName 数据库名
 	 * @param collectionName 集合名(表)
-	 * @param conditions 条件
-	 * @param fields 要查询的字段
+	 * @param filter 条件(nullable)
+	 * @param projection 要查询的字段(nullable)
+	 * @param sort 排序(nullable)
 	 * @param skip 跳过多少数据
 	 * @param limit 最多查询多少数据
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public List<Map<String, Object>> find(MongoClient mongoClient, String databaseName, String collectionName, Map<String, Object> conditions, Map<String, Object> fields, int skip, int limit) {
-		DB db = mongoClient.getDB(databaseName);
-		DBCollection dbCollection = db.getCollection(collectionName);
+	public List<Map<String, Object>> find(MongoClient mongoClient, String databaseName, String collectionName, Bson filter, Bson projection, Bson sort, int skip, int limit) {
+		final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 
-		DBCursor dbCursor = dbCollection.find(MapUtils.isEmpty(conditions) ? null : new BasicDBObject(conditions), MapUtils.isEmpty(fields) ? null : new BasicDBObject(fields)).skip(skip).limit(limit);
-
-		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(dbCursor.size());
-		while (dbCursor.hasNext()) {
-			result.add(dbCursor.next().toMap());
-		}
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
+		FindIterable<Document> iterable = filter == null ? collection.find() : collection.find(filter);
+		iterable.projection(projection).sort(sort).skip(skip).limit(limit).forEach(new Block<Document>() {
+			@Override
+			public void apply(Document t) {
+				result.add(new LinkedHashMap<String, Object>(t));
+			}
+		});
 		return result;
 	}
 
 	/**
-	 * @功能: 查询全部数据
+	 * @功能: 查询数据
 	 * @作者: yangc
-	 * @创建日期: 2015年3月14日 下午4:01:44
+	 * @创建日期: 2015年3月14日 下午3:59:14
 	 * @param mongoClient
 	 * @param databaseName 数据库名
 	 * @param collectionName 集合名(表)
-	 * @param conditions 条件
-	 * @param fields 要查询的字段
+	 * @param filter 条件(nullable)
+	 * @param projection 要查询的字段(nullable)
+	 * @param sort 排序(nullable)
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public List<Map<String, Object>> findAll(MongoClient mongoClient, String databaseName, String collectionName, Map<String, Object> conditions, Map<String, Object> fields) {
-		DB db = mongoClient.getDB(databaseName);
-		DBCollection dbCollection = db.getCollection(collectionName);
+	public List<Map<String, Object>> findAll(MongoClient mongoClient, String databaseName, String collectionName, Bson filter, Bson projection, Bson sort) {
+		final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 
-		DBCursor dbCursor = dbCollection.find(MapUtils.isEmpty(conditions) ? null : new BasicDBObject(conditions), MapUtils.isEmpty(fields) ? null : new BasicDBObject(fields));
-
-		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(dbCursor.size());
-		while (dbCursor.hasNext()) {
-			result.add(dbCursor.next().toMap());
-		}
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
+		FindIterable<Document> iterable = filter == null ? collection.find() : collection.find(filter);
+		iterable.projection(projection).sort(sort).forEach(new Block<Document>() {
+			@Override
+			public void apply(Document t) {
+				result.add(new LinkedHashMap<String, Object>(t));
+			}
+		});
 		return result;
 	}
 
@@ -198,14 +184,13 @@ public class MongodbUtils {
 	 * @param mongoClient
 	 * @param databaseName 数据库名
 	 * @param collectionName 集合名(表)
-	 * @param conditions 条件
+	 * @param filter 条件
 	 * @return
 	 */
-	public long getCount(MongoClient mongoClient, String databaseName, String collectionName, Map<String, Object> conditions) {
-		DB db = mongoClient.getDB(databaseName);
-		DBCollection dbCollection = db.getCollection(collectionName);
-
-		return dbCollection.count(MapUtils.isEmpty(conditions) ? new BasicDBObject() : new BasicDBObject(conditions));
+	public long getCount(MongoClient mongoClient, String databaseName, String collectionName, Bson filter) {
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
+		return collection.count(filter);
 	}
 
 }
