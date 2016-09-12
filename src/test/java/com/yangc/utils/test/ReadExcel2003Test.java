@@ -6,9 +6,9 @@ import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
 
-import com.yangc.utils.excel.ReadExcel2007;
+import com.yangc.utils.excel.ReadExcel2003;
 
-public class ReadExcel2007Test {
+public class ReadExcel2003Test {
 
 	public static void main(String[] args) {
 		Map<Integer, String> headNames = new HashMap<Integer, String>();
@@ -20,8 +20,8 @@ public class ReadExcel2007Test {
 		headNames.put(5, "test_5");
 		headNames.put(6, "test_6");
 
-		ReadExcel2007 excel = new ReadExcel2007();
-		List<Map<String, String>> list = excel.read("src/main/resources/test.xlsx", headNames, 1);
+		ReadExcel2003 excel = new ReadExcel2003();
+		List<Map<String, String>> list = excel.read("src/test/resources/test.xls", headNames, 0);
 		for (Map<String, String> map : list) {
 			System.out.print(MapUtils.getString(map, "test_0", "") + "\t");
 			System.out.print(MapUtils.getString(map, "test_1", "") + "\t");

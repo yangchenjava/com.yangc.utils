@@ -16,8 +16,8 @@ public class MongodbTest {
 
 	public static void main(String[] args) {
 		MongodbUtils mongodbUtils = new MongodbUtils();
-		MongoClient mongoClient = mongodbUtils.connect("192.168.7.8", 27017, "root", "root");
-		insert(mongodbUtils, mongoClient);
+		MongoClient mongoClient = mongodbUtils.connect("192.168.7.8", 40001, "root", "root");
+		// insert(mongodbUtils, mongoClient);
 		findAll(mongodbUtils, mongoClient);
 		getCount(mongodbUtils, mongoClient);
 		mongodbUtils.close(mongoClient);
@@ -49,7 +49,7 @@ public class MongodbTest {
 	public static void findAll(MongodbUtils mongodbUtils, MongoClient mongoClient) {
 		Bson filter = Filters.gte("age", 25);
 		Bson projection = Projections.fields(Projections.exclude("_id"), Projections.include("username", "age"));
-		List<Map<String, Object>> mapList = mongodbUtils.findAll(mongoClient, "blog", "T_SYS_TEST", filter, projection, null);
+		List<Map<String, Object>> mapList = mongodbUtils.findAll(mongoClient, "test", "t_user", filter, projection, null);
 		for (Map<String, Object> map : mapList) {
 			for (Map.Entry<String, Object> entry : map.entrySet()) {
 				System.out.println(entry.getKey() + " == " + entry.getValue());
@@ -59,7 +59,7 @@ public class MongodbTest {
 	}
 
 	public static void getCount(MongodbUtils mongodbUtils, MongoClient mongoClient) {
-		System.out.println("count=" + mongodbUtils.getCount(mongoClient, "blog", "T_SYS_TEST", null));
+		System.out.println("count=" + mongodbUtils.getCount(mongoClient, "test", "t_user", null));
 	}
 
 }

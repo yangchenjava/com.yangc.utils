@@ -73,7 +73,7 @@ public class WriteExcelTest {
 		sheets.add(sheet_2);
 
 		ExcelBean excelBean = new ExcelBean();
-		excelBean.setPath("src/main/resources/test.xlsx");
+		excelBean.setPath("src/test/resources/test.xlsx");
 		excelBean.setSheets(sheets);
 
 		WriteExcel excel = new WriteExcel();

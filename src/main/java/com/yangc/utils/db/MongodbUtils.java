@@ -11,7 +11,9 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
+import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -31,7 +33,10 @@ public class MongodbUtils {
 	public MongoClient connect(String host, int port, String username, String password) {
 		List<MongoCredential> credentialsList = new ArrayList<MongoCredential>();
 		credentialsList.add(MongoCredential.createCredential(username, "admin", password.toCharArray()));
-		return new MongoClient(new ServerAddress(host, port), credentialsList);
+
+		MongoClientOptions options = MongoClientOptions.builder().readPreference(ReadPreference.secondaryPreferred()).build();
+
+		return new MongoClient(new ServerAddress(host, port), credentialsList, options);
 	}
 
 	/**
@@ -44,7 +49,10 @@ public class MongodbUtils {
 	public MongoClient connect(List<ServerAddress> addrs, String username, String password) {
 		List<MongoCredential> credentialsList = new ArrayList<MongoCredential>();
 		credentialsList.add(MongoCredential.createCredential(username, "admin", password.toCharArray()));
-		return new MongoClient(addrs, credentialsList);
+
+		MongoClientOptions options = MongoClientOptions.builder().readPreference(ReadPreference.secondaryPreferred()).build();
+
+		return new MongoClient(addrs, credentialsList, options);
 	}
 
 	/**
