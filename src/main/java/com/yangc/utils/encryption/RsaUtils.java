@@ -267,7 +267,7 @@ public class RsaUtils {
 
 	public static void main(String[] args) {
 		testPublicEncryptPrivateDecrypt();
-		testPrivateEncryptPublicDecrypt();
+		// testPrivateEncryptPublicDecrypt();
 	}
 
 	/**
@@ -284,8 +284,9 @@ public class RsaUtils {
 		try {
 			Map<String, Object> keyMap = RsaUtils.getKeyMap();
 			byte[] encryptedData = RsaUtils.encryptByPublicKey(StringUtils.getBytesUtf8(data), RsaUtils.getPublicKey(keyMap));
-			System.out.println(StringUtils.newStringUtf8(encryptedData) + "\r\n===============");
-			byte[] decryptedData = RsaUtils.decryptByPrivateKey(encryptedData, RsaUtils.getPrivateKey(keyMap));
+			String base64 = Base64Utils.encode(encryptedData);
+			System.out.println(base64 + "\r\n===============");
+			byte[] decryptedData = RsaUtils.decryptByPrivateKey(Base64Utils.decode2Bytes(base64), RsaUtils.getPrivateKey(keyMap));
 			System.out.println(StringUtils.newStringUtf8(decryptedData) + "\r\n===============");
 		} catch (Exception e) {
 			e.printStackTrace();
