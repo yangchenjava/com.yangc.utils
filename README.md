@@ -21,7 +21,9 @@ EmailUtils - 邮件工具类，支持发送带附件的邮件
 ### encryption
 AesUtils - 实现AES加密解密<br />
 Base64Utils - 实现Base64加密解密<br />
-Md5Utils - 获取字符串或文件的md5
+DesUtils - 实现DES加密解密<br />
+Md5Utils - 获取字符串或文件的md5<br />
+RsaUtils - 实现RSA加密解密
 
 ### excel
 ReadExcel2003 - 以model方式读2003版Excel（大数据）<br />

@@ -12,34 +12,36 @@ import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yangc.utils.lang.ConverterUtils;
-
 public class AesUtils {
 
-	private static final String AES_PASSWORD = "1234567890abcdef";
-
+	private static final String AES = "AES";
+	// 随机算法
+	private static final String SHA1PRNG = "SHA1PRNG";
+	private static final String AES_CBC_PKCS5Padding = "AES/CBC/PKCS5Padding";
+	// 密钥偏移量(非ECB模式下)
+	private static final String IV = "1234567890123456";
 	private static final String UTF_8 = "UTF-8";
 
 	private AesUtils() {
 	}
 
-	public static String encode(String str) {
+	public static String encode(String str, String key) {
 		if (StringUtils.isNotEmpty(str)) {
 			try {
-				KeyGenerator kgen = KeyGenerator.getInstance("AES");
-				kgen.init(128, new SecureRandom(AES_PASSWORD.getBytes(UTF_8)));
-				SecretKey skey = kgen.generateKey();
-				byte[] raw = skey.getEncoded();
-				SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-				Cipher cipher = Cipher.getInstance("AES");
-				cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+				SecureRandom random = SecureRandom.getInstance(SHA1PRNG);
+				random.setSeed(key.getBytes(UTF_8));
+				KeyGenerator kgen = KeyGenerator.getInstance(AES);
+				kgen.init(128, random);
+				SecretKeySpec skeySpec = new SecretKeySpec(kgen.generateKey().getEncoded(), AES);
+				Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5Padding);
+				cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(IV.getBytes(UTF_8)));
 				byte[] bytes = cipher.doFinal(str.getBytes(UTF_8));
-				return ConverterUtils.byteToHexString(bytes);
+				return Base64Utils.encode(bytes);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -47,18 +49,18 @@ public class AesUtils {
 		return null;
 	}
 
-	public static String decode(String str) {
+	public static String decode(String str, String key) {
 		if (StringUtils.isNotEmpty(str)) {
 			try {
-				KeyGenerator kgen = KeyGenerator.getInstance("AES");
-				kgen.init(128, new SecureRandom(AES_PASSWORD.getBytes(UTF_8)));
-				SecretKey skey = kgen.generateKey();
-				byte[] raw = skey.getEncoded();
-				SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-				Cipher cipher = Cipher.getInstance("AES");
-				cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-				byte[] bytes = cipher.doFinal(ConverterUtils.hexStringToByte(str));
-				return new String(bytes);
+				SecureRandom random = SecureRandom.getInstance(SHA1PRNG);
+				random.setSeed(key.getBytes(UTF_8));
+				KeyGenerator kgen = KeyGenerator.getInstance(AES);
+				kgen.init(128, random);
+				SecretKeySpec skeySpec = new SecretKeySpec(kgen.generateKey().getEncoded(), AES);
+				Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5Padding);
+				cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(IV.getBytes(UTF_8)));
+				byte[] bytes = cipher.doFinal(Base64Utils.decode2Bytes(str));
+				return new String(bytes, UTF_8);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -70,13 +72,13 @@ public class AesUtils {
 		InputStream in = null;
 		OutputStream out = null;
 		try {
-			KeyGenerator kgen = KeyGenerator.getInstance("AES");
-			kgen.init(128, new SecureRandom(key.getBytes(UTF_8)));
-			SecretKey skey = kgen.generateKey();
-			byte[] raw = skey.getEncoded();
-			SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-			Cipher cipher = Cipher.getInstance("AES");
-			cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+			SecureRandom random = SecureRandom.getInstance(SHA1PRNG);
+			random.setSeed(key.getBytes(UTF_8));
+			KeyGenerator kgen = KeyGenerator.getInstance(AES);
+			kgen.init(128, random);
+			SecretKeySpec skeySpec = new SecretKeySpec(kgen.generateKey().getEncoded(), AES);
+			Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5Padding);
+			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(IV.getBytes(UTF_8)));
 
 			in = new FileInputStream(srcFilePath);
 			out = new FileOutputStream(validateFile(destFilePath));
@@ -97,13 +99,13 @@ public class AesUtils {
 		InputStream in = null;
 		OutputStream out = null;
 		try {
-			KeyGenerator kgen = KeyGenerator.getInstance("AES");
-			kgen.init(128, new SecureRandom(key.getBytes(UTF_8)));
-			SecretKey skey = kgen.generateKey();
-			byte[] raw = skey.getEncoded();
-			SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-			Cipher cipher = Cipher.getInstance("AES");
-			cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+			SecureRandom random = SecureRandom.getInstance(SHA1PRNG);
+			random.setSeed(key.getBytes(UTF_8));
+			KeyGenerator kgen = KeyGenerator.getInstance(AES);
+			kgen.init(128, random);
+			SecretKeySpec skeySpec = new SecretKeySpec(kgen.generateKey().getEncoded(), AES);
+			Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5Padding);
+			cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(IV.getBytes(UTF_8)));
 
 			in = new FileInputStream(srcFilePath);
 			out = new FileOutputStream(validateFile(destFilePath));
@@ -172,8 +174,8 @@ public class AesUtils {
 	}
 
 	public static void main(String[] args) {
-		System.out.println(AesUtils.encode("你好"));
-		System.out.println(AesUtils.decode("4D74B44A332CE88D9B3BD2431EB5FC73"));
+		System.out.println(AesUtils.encode("你好", "123456"));
+		System.out.println(AesUtils.decode("Hu9mVG0CXIVEOXYB5iw5KA==", "123456"));
 		System.out.println(AesUtils.getRandomKey(5));
 		AesUtils.encodeFile("E:/settings_localhost.xml", "E:/dd.xml", "123456");
 		AesUtils.decodeFile("E:/dd.xml", "E:/result.xml", "123456");
