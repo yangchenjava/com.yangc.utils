@@ -16,8 +16,8 @@ public class MongodbTest {
 
 	public static void main(String[] args) {
 		MongodbUtils mongodbUtils = new MongodbUtils();
-		MongoClient mongoClient = mongodbUtils.connect("192.168.7.8", 40001, "root", "root");
-		// insert(mongodbUtils, mongoClient);
+		MongoClient mongoClient = mongodbUtils.connect("192.168.7.31", 27017, "root", "root");
+		insert(mongodbUtils, mongoClient);
 		findAll(mongodbUtils, mongoClient);
 		getCount(mongodbUtils, mongoClient);
 		mongodbUtils.close(mongoClient);
@@ -43,7 +43,7 @@ public class MongodbTest {
 		record_3.put("password", "333");
 		record_3.put("age", 18);
 		records.add(record_3);
-		System.out.println("insert=" + mongodbUtils.insert(mongoClient, "blog", "T_SYS_TEST", records));
+		System.out.println("insert=" + mongodbUtils.batchInsert(mongoClient, "test", "t_user", records));
 	}
 
 	public static void findAll(MongodbUtils mongodbUtils, MongoClient mongoClient) {

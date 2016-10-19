@@ -18,6 +18,10 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.BulkWriteOptions;
+import com.mongodb.client.model.DeleteManyModel;
+import com.mongodb.client.model.InsertOneModel;
+import com.mongodb.client.model.UpdateManyModel;
 import com.mongodb.client.model.UpdateOptions;
 
 public class MongodbUtils {
@@ -94,23 +98,6 @@ public class MongodbUtils {
 	}
 
 	/**
-	 * @功能: 删除数据
-	 * @作者: yangc
-	 * @创建日期: 2015年3月14日 下午3:48:59
-	 * @param mongoClient
-	 * @param databaseName 数据库名
-	 * @param collectionName 集合名(表)
-	 * @param filter 条件
-	 * @return
-	 */
-	public boolean remove(MongoClient mongoClient, String databaseName, String collectionName, Bson filter) {
-		MongoDatabase database = mongoClient.getDatabase(databaseName);
-		MongoCollection<Document> collection = database.getCollection(collectionName);
-		collection.deleteMany(filter);
-		return true;
-	}
-
-	/**
 	 * @功能: 修改数据
 	 * @作者: yangc
 	 * @创建日期: 2015年3月14日 下午3:50:02
@@ -130,7 +117,98 @@ public class MongodbUtils {
 	}
 
 	/**
-	 * @功能: 查询数据
+	 * @功能: 删除数据
+	 * @作者: yangc
+	 * @创建日期: 2015年3月14日 下午3:48:59
+	 * @param mongoClient
+	 * @param databaseName 数据库名
+	 * @param collectionName 集合名(表)
+	 * @param filter 条件
+	 * @return
+	 */
+	public boolean remove(MongoClient mongoClient, String databaseName, String collectionName, Bson filter) {
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
+		collection.deleteMany(filter);
+		return true;
+	}
+
+	/**
+	 * @功能: 批量插入数据
+	 * @作者: yangc
+	 * @创建日期: 2016年10月19日 下午8:27:41
+	 * @param mongoClient
+	 * @param databaseName 数据库名
+	 * @param collectionName 集合名(表)
+	 * @param records 插入的记录
+	 * @return
+	 */
+	public boolean batchInsert(MongoClient mongoClient, String databaseName, String collectionName, List<LinkedHashMap<String, Object>> records) {
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
+
+		if (CollectionUtils.isNotEmpty(records)) {
+			List<InsertOneModel<Document>> requests = new ArrayList<InsertOneModel<Document>>(records.size());
+			for (LinkedHashMap<String, Object> record : records) {
+				requests.add(new InsertOneModel<Document>(new Document(record)));
+			}
+			return collection.bulkWrite(requests, new BulkWriteOptions().ordered(false)).wasAcknowledged();
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 批量修改数据
+	 * @作者: yangc
+	 * @创建日期: 2015年3月14日 下午3:50:02
+	 * @param mongoClient
+	 * @param databaseName 数据库名
+	 * @param collectionName 集合名(表)
+	 * @param filters 条件
+	 * @param updates 更新的新值
+	 * @param upsert true,如果查询不到记录,则插入修改的数据
+	 * @return
+	 */
+	public boolean batchUpdate(MongoClient mongoClient, String databaseName, String collectionName, List<Bson> filters, List<Bson> updates, boolean upsert) {
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
+
+		if (CollectionUtils.isNotEmpty(filters) && CollectionUtils.isNotEmpty(updates) && filters.size() == updates.size()) {
+			List<UpdateManyModel<Document>> requests = new ArrayList<UpdateManyModel<Document>>(filters.size());
+			for (int i = 0; i < filters.size(); i++) {
+				requests.add(new UpdateManyModel<Document>(filters.get(i), updates.get(i), new UpdateOptions().upsert(upsert)));
+			}
+			return collection.bulkWrite(requests, new BulkWriteOptions().ordered(false)).wasAcknowledged();
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 批量删除数据
+	 * @作者: yangc
+	 * @创建日期: 2015年3月14日 下午3:48:59
+	 * @param mongoClient
+	 * @param databaseName 数据库名
+	 * @param collectionName 集合名(表)
+	 * @param filters 条件
+	 * @return
+	 */
+	public boolean batchRemove(MongoClient mongoClient, String databaseName, String collectionName, List<Bson> filters) {
+		MongoDatabase database = mongoClient.getDatabase(databaseName);
+		MongoCollection<Document> collection = database.getCollection(collectionName);
+
+		if (CollectionUtils.isNotEmpty(filters)) {
+			List<DeleteManyModel<Document>> requests = new ArrayList<DeleteManyModel<Document>>(filters.size());
+			for (Bson filter : filters) {
+				requests.add(new DeleteManyModel<Document>(filter));
+			}
+			return collection.bulkWrite(requests, new BulkWriteOptions().ordered(false)).wasAcknowledged();
+		}
+		return false;
+	}
+
+	/**
+	 * @功能: 分页查询数据
 	 * @作者: yangc
 	 * @创建日期: 2015年3月14日 下午3:59:14
 	 * @param mongoClient
