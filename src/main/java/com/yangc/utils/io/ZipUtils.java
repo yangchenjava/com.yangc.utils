@@ -143,10 +143,10 @@ public class ZipUtils {
 			while (zipEntries.hasMoreElements()) {
 				ZipEntry zipEntry = (ZipEntry) zipEntries.nextElement();
 				if (zipEntry.isDirectory()) {
-					new File(destFilePath + "/" + zipEntry.getName()).mkdirs();
+					new File(destFilePath, zipEntry.getName()).mkdirs();
 					continue;
 				}
-				File file = new File(destFilePath + "/" + zipEntry.getName());
+				File file = new File(destFilePath, zipEntry.getName());
 				File parent = file.getParentFile();
 				if (parent != null && !parent.exists()) {
 					parent.mkdirs();
