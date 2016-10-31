@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class JsonUtils {
 
-	private static Gson gson;
+	private static final Gson gson;
 
 	static {
 		gson = new Gson();
