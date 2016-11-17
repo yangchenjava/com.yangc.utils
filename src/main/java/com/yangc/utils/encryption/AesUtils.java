@@ -15,6 +15,30 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Random Number Generator (RNG) 未指定的情况下 Android 2.3 以上版本使用的 随机数序列是 Android's OpenSSL-backed security provider
+ * 以下版本是 BouncyCastle Security Provider
+
+ * JDK 1.7 内没有这个Provider, 这个Android自己搞的, 服务端解不出来
+
+ * 目前Android支持的 Random Number Generator (RNG) 有以下几种
+
+ * Android's OpenSSL-backed security provider 1ASN.1, DER, PkiPath, PKCS7
+ * BouncyCastle Security Provider v1.49 HARMONY (SHA1 digest; SecureRandom; SHA1withDSA signature) Harmony JSSE Provider Android KeyStore security provider
+
+ * 服务端如果也没指定的话，默认使用的是 sun.security.provider.Sun
+ * Oracle JDK 1.7 环境下支持的 Random Number Generator (RNG) 有以下几种
+
+ * security.provider.1=sun.security.provider.Sun
+ * security.provider.2=sun.security.rsa.SunRsaSign
+ * security.provider.3=com.sun.net.ssl.internal.ssl.Provider
+ * security.provider.4=com.sun.crypto.provider.SunJCE
+ * security.provider.5=sun.security.jgss.SunProvider
+ * security.provider.6=com.sun.security.sasl.Provider
+ * security.provider.7=org.jcp.xml.dsig.internal.dom.XMLDSigRI
+ * security.provider.8=sun.security.smartcardio.SunPCSC
+ * security.provider.9=sun.security.mscapi.SunMSCAPI
+ */
 import org.apache.commons.lang3.StringUtils;
 
 public class AesUtils {

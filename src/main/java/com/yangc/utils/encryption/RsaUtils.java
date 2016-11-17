@@ -21,10 +21,8 @@ import org.apache.commons.codec.binary.StringUtils;
 
 public class RsaUtils {
 
-	/**
-	 * 加密算法RSA
-	 */
-	public static final String KEY_ALGORITHM = "RSA";
+	private static final String RSA = "RSA";
+	public static final String RSA_ECB_PKCS5Padding = "RSA/ECB/PKCS1Padding";
 
 	/**
 	 * 签名算法
@@ -48,7 +46,7 @@ public class RsaUtils {
 	 * 生成密钥对
 	 */
 	public static Map<String, Object> getKeyMap() throws Exception {
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(KEY_ALGORITHM);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(RSA);
 		keyPairGen.initialize(1024);
 		KeyPair keyPair = keyPairGen.generateKeyPair();
 		RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
@@ -70,7 +68,7 @@ public class RsaUtils {
 	public static String sign(byte[] data, String privateKey) throws Exception {
 		byte[] keyBytes = Base64Utils.decode2Bytes(privateKey);
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-		KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
 		PrivateKey privateK = keyFactory.generatePrivate(keySpec);
 		Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
 		signature.initSign(privateK);
@@ -90,7 +88,7 @@ public class RsaUtils {
 	public static boolean verify(byte[] data, String publicKey, String sign) throws Exception {
 		byte[] keyBytes = Base64Utils.decode2Bytes(publicKey);
 		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-		KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
 		PublicKey publicK = keyFactory.generatePublic(keySpec);
 		Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
 		signature.initVerify(publicK);
@@ -109,9 +107,9 @@ public class RsaUtils {
 	public static byte[] encryptByPrivateKey(byte[] data, String privateKey) throws Exception {
 		byte[] keyBytes = Base64Utils.decode2Bytes(privateKey);
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-		KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
 		Key privateK = keyFactory.generatePrivate(keySpec);
-		Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
+		Cipher cipher = Cipher.getInstance(RSA_ECB_PKCS5Padding);
 		cipher.init(Cipher.ENCRYPT_MODE, privateK);
 		int inputLen = data.length;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -145,9 +143,9 @@ public class RsaUtils {
 	public static byte[] decryptByPrivateKey(byte[] encryptedData, String privateKey) throws Exception {
 		byte[] keyBytes = Base64Utils.decode2Bytes(privateKey);
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-		KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
 		Key privateK = keyFactory.generatePrivate(keySpec);
-		Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
+		Cipher cipher = Cipher.getInstance(RSA_ECB_PKCS5Padding);
 		cipher.init(Cipher.DECRYPT_MODE, privateK);
 		int inputLen = encryptedData.length;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -181,10 +179,10 @@ public class RsaUtils {
 	public static byte[] encryptByPublicKey(byte[] data, String publicKey) throws Exception {
 		byte[] keyBytes = Base64Utils.decode2Bytes(publicKey);
 		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-		KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
 		Key publicK = keyFactory.generatePublic(keySpec);
 		// 对数据加密
-		Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
+		Cipher cipher = Cipher.getInstance(RSA_ECB_PKCS5Padding);
 		cipher.init(Cipher.ENCRYPT_MODE, publicK);
 		int inputLen = data.length;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -218,9 +216,9 @@ public class RsaUtils {
 	public static byte[] decryptByPublicKey(byte[] encryptedData, String publicKey) throws Exception {
 		byte[] keyBytes = Base64Utils.decode2Bytes(publicKey);
 		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-		KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
 		Key publicK = keyFactory.generatePublic(keySpec);
-		Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
+		Cipher cipher = Cipher.getInstance(RSA_ECB_PKCS5Padding);
 		cipher.init(Cipher.DECRYPT_MODE, publicK);
 		int inputLen = encryptedData.length;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -267,7 +265,7 @@ public class RsaUtils {
 
 	public static void main(String[] args) {
 		testPublicEncryptPrivateDecrypt();
-		// testPrivateEncryptPublicDecrypt();
+		testPrivateEncryptPublicDecrypt();
 	}
 
 	/**
@@ -307,7 +305,7 @@ public class RsaUtils {
 		try {
 			Map<String, Object> keyMap = RsaUtils.getKeyMap();
 			byte[] encryptedData = RsaUtils.encryptByPrivateKey(StringUtils.getBytesUtf8(data), RsaUtils.getPrivateKey(keyMap));
-			System.out.println(StringUtils.newStringUtf8(encryptedData) + "\r\n===============");
+			System.out.println(Base64Utils.encode(encryptedData) + "\r\n===============");
 			String sign = RsaUtils.sign(encryptedData, RsaUtils.getPrivateKey(keyMap));
 			System.out.println(sign + "\r\n===============");
 			boolean b = RsaUtils.verify(encryptedData, RsaUtils.getPublicKey(keyMap), sign);
