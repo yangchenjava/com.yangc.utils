@@ -40,9 +40,13 @@
 
 	<repositories>
 		<repository>
+			<id>aliyun</id>
+			<url>http://maven.aliyun.com/nexus/content/groups/public</url>
+		</repository>
+		<repository>
 			<id>central</id>
-			<url>http://central.maven.org/maven2/</url>
-			<!-- <url>http://127.0.0.1:8081/nexus/content/repositories/central/</url> -->
+			<url>http://central.maven.org/maven2</url>
+			<!-- <url>http://127.0.0.1:8081/nexus/content/repositories/central</url> -->
 		</repository>
 		<repository>
 			<id>repo1</id>
