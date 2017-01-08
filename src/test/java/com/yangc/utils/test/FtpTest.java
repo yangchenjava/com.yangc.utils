@@ -3,10 +3,11 @@ package com.yangc.utils.test;
 import java.util.Arrays;
 import java.util.List;
 
-import sun.net.ftp.FtpClient;
-
 import com.yangc.utils.net.FtpUtils;
 
+import sun.net.ftp.FtpClient;
+
+@SuppressWarnings("restriction")
 public class FtpTest {
 
 	public static void main(String[] args) {

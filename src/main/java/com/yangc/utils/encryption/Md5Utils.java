@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import sun.nio.ch.FileChannelImpl;
 
+@SuppressWarnings("restriction")
 public class Md5Utils {
 
 	/**

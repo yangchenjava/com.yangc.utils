@@ -16,6 +16,7 @@ import sun.net.TelnetInputStream;
 import sun.net.TelnetOutputStream;
 import sun.net.ftp.FtpClient;
 
+@SuppressWarnings("restriction")
 public class FtpUtils {
 
 	private static final int TIMEOUT = 6000;
