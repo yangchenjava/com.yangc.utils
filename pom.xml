@@ -215,7 +215,7 @@
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
-			<version>3.3.0</version>
+			<version>3.4.2</version>
 		</dependency>
 		<!-- poi -->
 		<dependency>
