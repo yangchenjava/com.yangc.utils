@@ -1,6 +1,8 @@
 package com.yangc.utils.encryption;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -8,6 +10,7 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -22,6 +25,7 @@ import org.apache.commons.codec.binary.StringUtils;
 public class RsaUtils {
 
 	private static final String RSA = "RSA";
+	// 算法名/工作模式/填充模式
 	public static final String RSA_ECB_PKCS5Padding = "RSA/ECB/PKCS1Padding";
 
 	/**
@@ -45,7 +49,7 @@ public class RsaUtils {
 	/**
 	 * 生成密钥对
 	 */
-	public static Map<String, Object> getKeyMap() throws Exception {
+	public static Map<String, Object> getKeyMap() throws GeneralSecurityException {
 		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(RSA);
 		keyPairGen.initialize(1024);
 		KeyPair keyPair = keyPairGen.generateKeyPair();
@@ -65,7 +69,7 @@ public class RsaUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String sign(byte[] data, String privateKey) throws Exception {
+	public static String sign(byte[] data, String privateKey) throws GeneralSecurityException {
 		byte[] keyBytes = Base64Utils.decode2Bytes(privateKey);
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
 		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
@@ -85,7 +89,7 @@ public class RsaUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean verify(byte[] data, String publicKey, String sign) throws Exception {
+	public static boolean verify(byte[] data, String publicKey, String sign) throws GeneralSecurityException {
 		byte[] keyBytes = Base64Utils.decode2Bytes(publicKey);
 		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
 		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
@@ -104,7 +108,7 @@ public class RsaUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] encryptByPrivateKey(byte[] data, String privateKey) throws Exception {
+	public static byte[] encryptByPrivateKey(byte[] data, String privateKey) throws GeneralSecurityException, IOException {
 		byte[] keyBytes = Base64Utils.decode2Bytes(privateKey);
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
 		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
@@ -140,7 +144,7 @@ public class RsaUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] decryptByPrivateKey(byte[] encryptedData, String privateKey) throws Exception {
+	public static byte[] decryptByPrivateKey(byte[] encryptedData, String privateKey) throws GeneralSecurityException, IOException {
 		byte[] keyBytes = Base64Utils.decode2Bytes(privateKey);
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
 		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
@@ -176,7 +180,7 @@ public class RsaUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] encryptByPublicKey(byte[] data, String publicKey) throws Exception {
+	public static byte[] encryptByPublicKey(byte[] data, String publicKey) throws GeneralSecurityException, IOException {
 		byte[] keyBytes = Base64Utils.decode2Bytes(publicKey);
 		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
 		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
@@ -211,9 +215,10 @@ public class RsaUtils {
 	 * @param encryptedData 已加密数据
 	 * @param publicKey 公钥(BASE64编码)
 	 * @return
+	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static byte[] decryptByPublicKey(byte[] encryptedData, String publicKey) throws Exception {
+	public static byte[] decryptByPublicKey(byte[] encryptedData, String publicKey) throws GeneralSecurityException, IOException {
 		byte[] keyBytes = Base64Utils.decode2Bytes(publicKey);
 		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
 		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
@@ -261,6 +266,70 @@ public class RsaUtils {
 	public static String getPublicKey(Map<String, Object> keyMap) {
 		Key key = (Key) keyMap.get(PUBLIC_KEY);
 		return Base64Utils.encode(key.getEncoded());
+	}
+
+	/**
+	 * @功能: 移除微软前导0
+	 * @作者: yangc
+	 * @创建日期: 2017年2月14日 上午11:37:21
+	 * @param data
+	 * @return
+	 */
+	private static byte[] removeMSZero(byte[] data) {
+		byte[] b;
+		if (data[0] == 0) {
+			b = new byte[data.length - 1];
+			System.arraycopy(data, 1, b, 0, data.length - 1);
+		} else {
+			b = data;
+		}
+		return b;
+	}
+
+	/**
+	 * 获取私钥(C#格式)
+	 * 
+	 * @param keyMap 密钥对
+	 * @return
+	 */
+	public static String getPrivateKey2CSharp(Map<String, Object> keyMap) throws GeneralSecurityException {
+		Key key = (Key) keyMap.get(PRIVATE_KEY);
+		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(key.getEncoded());
+		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
+		RSAPrivateCrtKey privateK = (RSAPrivateCrtKey) keyFactory.generatePrivate(keySpec);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("<RSAKeyValue>");
+		sb.append("<Modulus>" + Base64Utils.encode(removeMSZero(privateK.getModulus().toByteArray())) + "</Modulus>");
+		sb.append("<Exponent>" + Base64Utils.encode(removeMSZero(privateK.getPublicExponent().toByteArray())) + "</Exponent>");
+		sb.append("<P>" + Base64Utils.encode(removeMSZero(privateK.getPrimeP().toByteArray())) + "</P>");
+		sb.append("<Q>" + Base64Utils.encode(removeMSZero(privateK.getPrimeQ().toByteArray())) + "</Q>");
+		sb.append("<DP>" + Base64Utils.encode(removeMSZero(privateK.getPrimeExponentP().toByteArray())) + "</DP>");
+		sb.append("<DQ>" + Base64Utils.encode(removeMSZero(privateK.getPrimeExponentQ().toByteArray())) + "</DQ>");
+		sb.append("<InverseQ>" + Base64Utils.encode(removeMSZero(privateK.getCrtCoefficient().toByteArray())) + "</InverseQ>");
+		sb.append("<D>" + Base64Utils.encode(removeMSZero(privateK.getPrivateExponent().toByteArray())) + "</D>");
+		sb.append("</RSAKeyValue>");
+		return sb.toString();
+	}
+
+	/**
+	 * 获取公钥(C#格式)
+	 * 
+	 * @param keyMap 密钥对
+	 * @return
+	 */
+	public static String getPublicKey2CSharp(Map<String, Object> keyMap) throws GeneralSecurityException {
+		Key key = (Key) keyMap.get(PUBLIC_KEY);
+		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(key.getEncoded());
+		KeyFactory keyFactory = KeyFactory.getInstance(RSA);
+		RSAPublicKey publicK = (RSAPublicKey) keyFactory.generatePublic(keySpec);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("<RSAKeyValue>");
+		sb.append("<Modulus>" + Base64Utils.encode(removeMSZero(publicK.getModulus().toByteArray())) + "</Modulus>");
+		sb.append("<Exponent>" + Base64Utils.encode(removeMSZero(publicK.getPublicExponent().toByteArray())) + "</Exponent>");
+		sb.append("</RSAKeyValue>");
+		return sb.toString();
 	}
 
 	public static void main(String[] args) {
