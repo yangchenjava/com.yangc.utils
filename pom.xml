@@ -96,7 +96,7 @@
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>ojdbc6</artifactId>
-			<version>12.1.0.2</version>
+			<version>12.1.0.1-atlassian-hosted</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -125,7 +125,7 @@
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.2</version>
+			<version>1.9.3</version>
 		</dependency>
 		<!-- io工具类 -->
 		<dependency>
