@@ -16,7 +16,7 @@ public class MongodbTest {
 
 	public static void main(String[] args) {
 		MongodbUtils mongodbUtils = new MongodbUtils();
-		MongoClient mongoClient = mongodbUtils.connect("192.168.7.31", 27017, "root", "root");
+		MongoClient mongoClient = mongodbUtils.connect("192.168.7.31", 27017, "admin", "root", "root");
 		insert(mongodbUtils, mongoClient);
 		findAll(mongodbUtils, mongoClient);
 		getCount(mongodbUtils, mongoClient);

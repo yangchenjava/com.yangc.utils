@@ -32,11 +32,14 @@ public class MongodbUtils {
 	 * @创建日期: 2015年3月14日 下午3:45:32
 	 * @param host
 	 * @param port
+	 * @param databaseName
+	 * @param username
+	 * @param password
 	 * @return
 	 */
-	public MongoClient connect(String host, int port, String username, String password) {
+	public MongoClient connect(String host, int port, String databaseName, String username, String password) {
 		List<MongoCredential> credentialsList = new ArrayList<MongoCredential>();
-		credentialsList.add(MongoCredential.createCredential(username, "admin", password.toCharArray()));
+		credentialsList.add(MongoCredential.createCredential(username, databaseName, password.toCharArray()));
 
 		MongoClientOptions options = MongoClientOptions.builder().readPreference(ReadPreference.secondaryPreferred()).build();
 
@@ -48,11 +51,14 @@ public class MongodbUtils {
 	 * @作者: yangc
 	 * @创建日期: 2015年3月14日 下午3:46:26
 	 * @param hosts
+	 * @param databaseName
+	 * @param username
+	 * @param password
 	 * @return
 	 */
-	public MongoClient connect(List<ServerAddress> addrs, String username, String password) {
+	public MongoClient connect(List<ServerAddress> addrs, String databaseName, String username, String password) {
 		List<MongoCredential> credentialsList = new ArrayList<MongoCredential>();
-		credentialsList.add(MongoCredential.createCredential(username, "admin", password.toCharArray()));
+		credentialsList.add(MongoCredential.createCredential(username, databaseName, password.toCharArray()));
 
 		MongoClientOptions options = MongoClientOptions.builder().readPreference(ReadPreference.secondaryPreferred()).build();
 
