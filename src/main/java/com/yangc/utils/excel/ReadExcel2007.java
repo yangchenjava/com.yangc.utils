@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -196,6 +197,7 @@ public class ReadExcel2007 {
 		this.headNames = headNames;
 		this.beginRownum = beginRownum;
 
+		InputStream in = null;
 		try {
 			XSSFReader reader = new XSSFReader(OPCPackage.open(path));
 			XMLReader xmlReader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
@@ -203,9 +205,9 @@ public class ReadExcel2007 {
 
 			Iterator<InputStream> sheets = reader.getSheetsData();
 			while (sheets.hasNext()) {
-				InputStream sheet = sheets.next();
-				xmlReader.parse(new InputSource(sheet));
-				sheet.close();
+				in = sheets.next();
+				xmlReader.parse(new InputSource(in));
+				IOUtils.closeQuietly(in);
 			}
 		} catch (InvalidFormatException e) {
 			e.printStackTrace();
@@ -215,6 +217,8 @@ public class ReadExcel2007 {
 			e.printStackTrace();
 		} catch (SAXException e) {
 			e.printStackTrace();
+		} finally {
+			if (in != null) IOUtils.closeQuietly(in);
 		}
 		return tableContents;
 	}

@@ -55,8 +55,6 @@ public class WriteExcel {
 			fos = new FileOutputStream(excelBean.getPath());
 			workbook.write(fos);
 			fos.flush();
-			fos.close();
-			fos = null;
 			return true;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -65,6 +63,7 @@ public class WriteExcel {
 		} finally {
 			try {
 				if (fos != null) fos.close();
+				if (workbook != null) workbook.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
