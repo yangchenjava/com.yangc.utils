@@ -26,7 +26,7 @@ public class LruCacheUtils<K, V> extends LinkedHashMap<K, V> {
 	}
 
 	public static void main(String[] args) {
-		LruCacheUtils<String, String> t = new LruCacheUtils<>(5);
+		LruCacheUtils<String, String> t = new LruCacheUtils<String, String>(5);
 		t.put("a", "a");
 		t.put("b", "b");
 		t.put("c", "c");
@@ -36,9 +36,9 @@ public class LruCacheUtils<K, V> extends LinkedHashMap<K, V> {
 		t.get("a");
 		t.get("d");
 		t.put("f", "f");
-		t.forEach((k, v) -> {
-			System.out.println(k + " == " + v);
-		});
+		for (Map.Entry<String, String> entry : t.entrySet()) {
+			System.out.println(entry.getKey() + " == " + entry.getValue());
+		}
 	}
 
 }
